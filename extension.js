@@ -53,6 +53,10 @@ const DockerMenu = new Lang.Class({
     _feedMenu: function() {
       let delimiter = ',';
       let [res, out, err, status] = GLib.spawn_command_line_sync("docker ps -a --format '{{.Names}}" + delimiter + "{{.Status}}'");
+
+      //print("DEBUG : Displaying docker containers");
+      //print(out);
+
       let outStr = String.fromCharCode.apply(String, out);
       let dockerContainers = outStr.split('\n');
 
@@ -65,25 +69,26 @@ const DockerMenu = new Lang.Class({
           // Docker container is not running
           if(status.indexOf("Exited") > -1) {
               gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_red.png");
-              subMenu.menu.addAction("Start", function(event) {
-                  GLib.spawn_command_line_sync("docker start " + name);
-                  this.menu = new PopupMenu.PopupMenuSection();
-                  // FIXME refresh menu ...
-              });
+              subMenu.menu.addAction("Start", _handleStartEvent);
           }
           // Docker container is up
           else if(status.indexOf("Up") > -1) {
               if(status.indexOf("Paused") > -1) {
                   gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_yellow.png");
-                  // TODO docker unpause ...
+                  subMenu.menu.addAction("Unpause", function(event) {
+                      GLib.spawn_command_line_sync("docker unpause " + name);
+
+                  });
+
               } else {
                   gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_green.png");
 
                   subMenu.menu.addAction("Pause", function(event) {
-
+                      GLib.spawn_command_line_sync("docker pause " + name);
                   });
 
                   subMenu.menu.addAction("Stop", function(event) {
+                      GLib.spawn_command_line_sync("docker stop " + name);
                   });
               }
           }
@@ -118,4 +123,14 @@ function enable() {
 // Triggered when extension is disabled
 function disable() {
     _indicator.destroy();
+}
+
+function _handleStartEvent(event) {
+    let name = "mongo-flights";
+    // TODO get action (e.g Start) and name (e.g mongo-flights)
+    print(event.get_source().get_label_actor());
+    print(event.get_source().get_parent().get_parent().get_parent().get_parent().get_label_actor());
+  //GLib.spawn_command_line_sync("docker start " + name);
+    disable();
+    enable();
 }
