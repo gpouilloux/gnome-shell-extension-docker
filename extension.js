@@ -86,15 +86,54 @@ const DockerMenu = new Lang.Class({
       	this._renderMenu();
     },
 
+    // Checks if docker is installed on the host machine
+    _isDockerInstalled: function() {
+        let [res, out, err, status] = GLib.spawn_command_line_sync("docker -v");
+        return status == 0;
+    },
+
+    // Checks if the docker daemon is running or not
+    _isDockerRunning: function() {
+        let [res, pid, in_fd, out_fd, err_fd] = GLib.spawn_async_with_pipes(null, ['/bin/ps', 'cax'], null, 0, null);
+
+        let out_reader = new Gio.DataInputStream({
+          base_stream: new Gio.UnixInputStream({fd: out_fd})
+        });
+
+        // Look for the docker process running
+        let dockerRunning = false;
+        let hasLine = true;
+        do {
+            let [out, size] = out_reader.read_line(null);
+            if(out != null && out.toString().indexOf("docker") > -1) {
+                dockerRunning = true;
+            } else if(size <= 0) {
+                hasLine = false;
+            }
+
+        } while(!dockerRunning && hasLine);
+
+        return dockerRunning;
+    },
+
     // Show docker menu icon only if installed and append docker containers
     _renderMenu: function() {
-       let [res, out, err, status] = GLib.spawn_command_line_sync("docker -v");
-       if(status == 0) {
+        if(this._isDockerInstalled()) {
           this.actor.show();
-          this._feedMenu();
-       } else {
+          if(this._isDockerRunning()) {
+              this._feedMenu();
+          } else {
+              this.menu.addAction("Docker daemon not started, click to start it!", function(event) {
+                  disable();
+                  // TODO check result of command and sudo available on all unix platforms ?
+                  // FIXME replace sync call by async with a loading message
+                  //GLib.spawn_command_line_sync("sudo docker daemon");
+                  enable();
+              });
+          }
+        } else {
           this.actor.hide();
-       }
+        }
     },
 
     // Append containers to menu
@@ -104,6 +143,11 @@ const DockerMenu = new Lang.Class({
 
       let outStr = String.fromCharCode.apply(String, out);
       let dockerContainers = outStr.split('\n');
+
+      this.menu.addAction(dockerContainers.length + " containers. Refresh ?", function(event) {
+          disable();
+          enable();
+      });
 
       // foreach container, add an entry in the menu
       for(let i = 0; i < dockerContainers.length-1; i++) {
