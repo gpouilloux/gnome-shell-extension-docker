@@ -1,23 +1,71 @@
 // Docker menu extension
 // @author Guillaume Pouilloux <gui.pouilloux@gmail.com>
 
-const Clutter = imports.gi.Clutter;
-const Gio = imports.gi.Gio;
-const Lang = imports.lang;
-const St = imports.gi.St;
-const Shell = imports.gi.Shell;
-
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
-const _ = Gettext.gettext;
-
 const Main = imports.ui.main;
-const Panel = imports.ui.panel;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
-
+const St = imports.gi.St;
+const Lang = imports.lang;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+
+// Docker actions for each container
+const DockerMenuItem = new Lang.Class({
+    Name: 'DockerMenu.DockerMenuItem',
+    Extends: PopupMenu.PopupMenuItem,
+
+    _init: function(containerName, dockerCommand) {
+        let itemLabel = dockerCommand.charAt(0).toUpperCase() + dockerCommand.slice(1);
+      	this.parent(itemLabel);
+
+      	this.containerName = containerName;
+        this.dockerCommand = dockerCommand;
+
+        this.connect('activate', Lang.bind(this, this._dockerAction));
+    },
+
+    _dockerAction : function() {
+        // TODO check if command line succeeded and if not display the error message
+        GLib.spawn_command_line_sync("docker " + this.dockerCommand + " " + this.containerName);
+
+        // refresh the menu
+        disable();
+        enable();
+    }
+});
+
+// Menu entry representing a docker container
+const DockerSubMenuMenuItem = new Lang.Class({
+    Name: 'DockerMenu.DockerSubMenuMenuItem',
+    Extends: PopupMenu.PopupSubMenuMenuItem,
+
+    _init: function(containerName, containerStatusMessage) {
+        this.parent(containerName);
+        let gicon;
+
+        // Docker container is not running
+        if(containerStatusMessage.indexOf("Exited") > -1) {
+            gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_red.png");
+            this.menu.addMenuItem(new DockerMenuItem(containerName, "start"));
+        }
+        // Docker container is up
+        else if(containerStatusMessage.indexOf("Up") > -1) {
+            if(containerStatusMessage.indexOf("Paused") > -1) {
+                gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_yellow.png");
+                this.menu.addMenuItem(new DockerMenuItem(containerName, "unpause"));
+            } else {
+                gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_green.png");
+                this.menu.addMenuItem(new DockerMenuItem(containerName, "pause"));
+                this.menu.addMenuItem(new DockerMenuItem(containerName, "stop"));
+            }
+        }
+
+        let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '10'});
+        this.actor.insert_child_at_index(dockerIcon, 1);
+    }
+});
 
 // Docker icon on status menu
 const DockerMenu = new Lang.Class({
@@ -54,55 +102,15 @@ const DockerMenu = new Lang.Class({
       let delimiter = ',';
       let [res, out, err, status] = GLib.spawn_command_line_sync("docker ps -a --format '{{.Names}}" + delimiter + "{{.Status}}'");
 
-      //print("DEBUG : Displaying docker containers");
-      //print(out);
-
       let outStr = String.fromCharCode.apply(String, out);
       let dockerContainers = outStr.split('\n');
 
-      for(var i = 0; i < dockerContainers.length-1; i++) {
-          let [name, status] = dockerContainers[i].split(delimiter);
-
-          let subMenu = new PopupMenu.PopupSubMenuMenuItem(name);
-          let gicon;
-
-          // Docker container is not running
-          if(status.indexOf("Exited") > -1) {
-              gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_red.png");
-              subMenu.menu.addAction("Start", _handleStartEvent);
-          }
-          // Docker container is up
-          else if(status.indexOf("Up") > -1) {
-              if(status.indexOf("Paused") > -1) {
-                  gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_yellow.png");
-                  subMenu.menu.addAction("Unpause", function(event) {
-                      GLib.spawn_command_line_sync("docker unpause " + name);
-
-                  });
-
-              } else {
-                  gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_green.png");
-
-                  subMenu.menu.addAction("Pause", function(event) {
-                      GLib.spawn_command_line_sync("docker pause " + name);
-                  });
-
-                  subMenu.menu.addAction("Stop", function(event) {
-                      GLib.spawn_command_line_sync("docker stop " + name);
-                  });
-              }
-          }
-
-          let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '10'});
+      // foreach container, add an entry in the menu
+      for(let i = 0; i < dockerContainers.length-1; i++) {
+          let [containerName, containerStatusMessage] = dockerContainers[i].split(delimiter);
+          let subMenu = new DockerSubMenuMenuItem(containerName, containerStatusMessage);
           this.menu.addMenuItem(subMenu);
-          subMenu.actor.insert_child_at_index(dockerIcon, 1);
-
       }
-    },
-
-    // Destroy menu
-    destroy: function() {
-        this.parent();
     }
 
 });
@@ -123,14 +131,4 @@ function enable() {
 // Triggered when extension is disabled
 function disable() {
     _indicator.destroy();
-}
-
-function _handleStartEvent(event) {
-    let name = "mongo-flights";
-    // TODO get action (e.g Start) and name (e.g mongo-flights)
-    print(event.get_source().get_label_actor());
-    print(event.get_source().get_parent().get_parent().get_parent().get_parent().get_label_actor());
-  //GLib.spawn_command_line_sync("docker start " + name);
-    disable();
-    enable();
 }
