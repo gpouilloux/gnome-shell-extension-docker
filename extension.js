@@ -89,6 +89,9 @@ const DockerMenu = new Lang.Class({
         hbox.add_child(dockerIcon);
         this.actor.add_child(hbox);
 
+        // TODO refresh the menu everytime the user click on the docker icon
+        //this.actor.connect('button_press_event', enable);
+
       	this._renderMenu();
     },
 
@@ -137,23 +140,17 @@ const DockerMenu = new Lang.Class({
               this._feedMenu();
           } else {
                   let errMsg = "Docker daemon not started";
-                  this.menu.addAction(errMsg + " " + "(Refresh)", Lang.bind(this, this._refreshMenu));
+                  this.menu.addAction(errMsg + " " + "(Refresh)", _refreshMenu);
                   log(errMsg);
                   Main.notify(errMsg);
           }
         } else {
               let errMsg = "Docker binary not found in PATH ";
-              this.menu.addAction(errMsg + " " + "(Refresh)", Lang.bind(this, this._refreshMenu));
+              this.menu.addAction(errMsg + " " + "(Refresh)", _refreshMenu);
               log(errMsg);
               Main.notify(errMsg);
         }
         this.actor.show();
-    },
-
-    // Refresh the menu by disabling and enabling it
-    _refreshMenu: function() {
-        disable();
-        enable();
     },
 
     // Append containers to menu
@@ -165,9 +162,7 @@ const DockerMenu = new Lang.Class({
           let outStr = String.fromCharCode.apply(String, out);
           let dockerContainers = outStr.split('\n');
 
-          this.menu.addAction(dockerContainers.length + " containers (Refresh)", function(event) {
-              this._refreshMenu();
-          });
+          this.menu.addAction(dockerContainers.length + " containers (Refresh)", _refreshMenu);
 
           // foreach container, add an entry in the menu
           for(let i = 0; i < dockerContainers.length-1; i++) {
@@ -177,7 +172,7 @@ const DockerMenu = new Lang.Class({
           }
       } else {
           let errMsg = "Error occurred when fetching containers";
-          this.menu.addAction(errMsg + " " + "(Refresh)", Lang.bind(this, this._refreshMenu));
+          this.menu.addAction(errMsg + " " + "(Refresh)", _refreshMenu);
           log(errMsg);
           log(err);
           Main.notify(errMsg);
@@ -201,4 +196,10 @@ function enable() {
 // Triggered when extension is disabled
 function disable() {
     _indicator.destroy();
+}
+
+// Refresh the menu by disabling and enabling it
+function _refreshMenu() {
+    disable();
+    enable();
 }
