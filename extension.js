@@ -87,6 +87,7 @@ const DockerMenu = new Lang.Class({
         let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '30'});
 
         hbox.add_child(dockerIcon);
+        hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
         this.actor.add_child(hbox);
 
         // TODO refresh the menu everytime the user click on the docker icon
