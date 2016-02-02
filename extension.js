@@ -68,8 +68,8 @@ const DockerSubMenuMenuItem = new Lang.Class({
             }
         }
 
-        let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '10'});
-        this.actor.insert_child_at_index(dockerIcon, 1);
+        let statusIcon = new St.Icon({ gicon: gicon, icon_size: '10'});
+        this.actor.insert_child_at_index(statusIcon, 1);
     }
 });
 
@@ -84,7 +84,7 @@ const DockerMenu = new Lang.Class({
 
         let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
         let gicon = Gio.icon_new_for_string(Me.path + "/icons/docker.png");
-        let dockerIcon = new St.Icon({ gicon: gicon});
+        let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '30'});
 
         hbox.add_child(dockerIcon);
         this.actor.add_child(hbox);
