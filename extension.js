@@ -131,13 +131,13 @@ const DockerMenu = new Lang.Class({
               this._feedMenu();
           } else {
                   this.menu.addAction("Docker daemon not started (Refresh)", function(event) {
-                  this._refreshMenu();
-              });
+                      this._refreshMenu();
+                  });
           }
         } else {
               this.menu.addAction("Docker binary not found in PATH (Refresh)", function(event) {
-              this._refreshMenu();
-            });
+                  this._refreshMenu();
+              });
         }
         this.actor.show();
     },
@@ -153,19 +153,28 @@ const DockerMenu = new Lang.Class({
       let delimiter = ',';
       let [res, out, err, status] = GLib.spawn_command_line_sync("docker ps -a --format '{{.Names}}" + delimiter + "{{.Status}}'");
 
-      let outStr = String.fromCharCode.apply(String, out);
-      let dockerContainers = outStr.split('\n');
+      if(status == 0) {
+          let outStr = String.fromCharCode.apply(String, out);
+          let dockerContainers = outStr.split('\n');
 
-      this.menu.addAction(dockerContainers.length + " containers (Refresh)", function(event) {
-          this._refreshMenu();
-      });
+          this.menu.addAction(dockerContainers.length + " containers (Refresh)", function(event) {
+              this._refreshMenu();
+          });
 
-      // foreach container, add an entry in the menu
-      for(let i = 0; i < dockerContainers.length-1; i++) {
-          let [containerName, containerStatusMessage] = dockerContainers[i].split(delimiter);
-          let subMenu = new DockerSubMenuMenuItem(containerName, containerStatusMessage);
-          this.menu.addMenuItem(subMenu);
+          // foreach container, add an entry in the menu
+          for(let i = 0; i < dockerContainers.length-1; i++) {
+              let [containerName, containerStatusMessage] = dockerContainers[i].split(delimiter);
+              let subMenu = new DockerSubMenuMenuItem(containerName, containerStatusMessage);
+              this.menu.addMenuItem(subMenu);
+          }
+      } else {
+          this.menu.addAction("Error occurred when fetching containers (Refresh)", function(event) {
+              log("Error occurred when fetching containers, please check the error message below : ");
+              log(err);
+              this._refreshMenu();
+          });
       }
+
     }
 
 });
