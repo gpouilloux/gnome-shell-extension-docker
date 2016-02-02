@@ -88,8 +88,16 @@ const DockerMenu = new Lang.Class({
 
     // Checks if docker is installed on the host machine
     _isDockerInstalled: function() {
-        let [res, out, err, status] = GLib.spawn_command_line_sync("docker -v");
-        return status == 0;
+        let isDockerInstalled = false;
+        try {
+            let [res, out, err, status] = GLib.spawn_command_line_sync("docker -v");
+            isDockerInstalled = (status == 0);
+        }
+        catch(err) {
+            log(err);
+        }
+
+        return isDockerInstalled;
     },
 
     // Checks if the docker daemon is running or not
@@ -119,21 +127,25 @@ const DockerMenu = new Lang.Class({
     // Show docker menu icon only if installed and append docker containers
     _renderMenu: function() {
         if(this._isDockerInstalled()) {
-          this.actor.show();
           if(this._isDockerRunning()) {
               this._feedMenu();
           } else {
-              this.menu.addAction("Docker daemon not started, click to start it!", function(event) {
-                  disable();
-                  // TODO check result of command and sudo available on all unix platforms ?
-                  // FIXME replace sync call by async with a loading message
-                  //GLib.spawn_command_line_sync("sudo docker daemon");
-                  enable();
+                  this.menu.addAction("Docker daemon not started (Refresh)", function(event) {
+                  this._refreshMenu();
               });
           }
         } else {
-          this.actor.hide();
+              this.menu.addAction("Docker binary not found in PATH (Refresh)", function(event) {
+              this._refreshMenu();
+            });
         }
+        this.actor.show();
+    },
+
+    // Refresh the menu by disabling and enabling it
+    _refreshMenu: function() {
+        disable();
+        enable();
     },
 
     // Append containers to menu
@@ -144,9 +156,8 @@ const DockerMenu = new Lang.Class({
       let outStr = String.fromCharCode.apply(String, out);
       let dockerContainers = outStr.split('\n');
 
-      this.menu.addAction(dockerContainers.length + " containers. Refresh ?", function(event) {
-          disable();
-          enable();
+      this.menu.addAction(dockerContainers.length + " containers (Refresh)", function(event) {
+          this._refreshMenu();
       });
 
       // foreach container, add an entry in the menu
