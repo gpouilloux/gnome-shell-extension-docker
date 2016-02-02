@@ -27,12 +27,18 @@ const DockerMenuItem = new Lang.Class({
     },
 
     _dockerAction : function() {
-        // TODO check if command line succeeded and if not display the error message
-        GLib.spawn_command_line_sync("docker " + this.dockerCommand + " " + this.containerName);
-
-        // refresh the menu
-        disable();
-        enable();
+        let dockerCmd = "docker " + this.dockerCommand + " " + this.containerName;
+        let [res, out, err, status] = GLib.spawn_command_line_sync(dockerCmd);
+        if(status == 0) {
+            // refresh the menu
+            disable();
+            enable();
+        } else {
+            let errMsg = "Error occurred when running command line " + cmd + ", please check the error below";
+            Main.notify(errMsg);
+            log(errMsg);
+            log(err);
+        }
     }
 });
 
@@ -130,14 +136,16 @@ const DockerMenu = new Lang.Class({
           if(this._isDockerRunning()) {
               this._feedMenu();
           } else {
-                  this.menu.addAction("Docker daemon not started (Refresh)", function(event) {
-                      this._refreshMenu();
-                  });
+                  let errMsg = "Docker daemon not started";
+                  this.menu.addAction(errMsg + " " + "(Refresh)", Lang.bind(this, this._refreshMenu));
+                  log(errMsg);
+                  Main.notify(errMsg);
           }
         } else {
-              this.menu.addAction("Docker binary not found in PATH (Refresh)", function(event) {
-                  this._refreshMenu();
-              });
+              let errMsg = "Docker binary not found in PATH ";
+              this.menu.addAction(errMsg + " " + "(Refresh)", Lang.bind(this, this._refreshMenu));
+              log(errMsg);
+              Main.notify(errMsg);
         }
         this.actor.show();
     },
@@ -168,15 +176,13 @@ const DockerMenu = new Lang.Class({
               this.menu.addMenuItem(subMenu);
           }
       } else {
-          this.menu.addAction("Error occurred when fetching containers (Refresh)", function(event) {
-              log("Error occurred when fetching containers, please check the error message below : ");
-              log(err);
-              this._refreshMenu();
-          });
+          let errMsg = "Error occurred when fetching containers";
+          this.menu.addAction(errMsg + " " + "(Refresh)", Lang.bind(this, this._refreshMenu));
+          log(errMsg);
+          log(err);
+          Main.notify(errMsg);
       }
-
     }
-
 });
 
 // Triggered when extension has been initialized
