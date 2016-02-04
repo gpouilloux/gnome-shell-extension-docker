@@ -26,20 +26,37 @@ const DockerMenuItem = new Lang.Class({
         this.connect('activate', Lang.bind(this, this._dockerAction));
     },
 
-    _dockerAction : function() {
-        let dockerCmd = "docker " + this.dockerCommand + " " + this.containerName;
-        let [res, out, err, status] = GLib.spawn_command_line_sync(dockerCmd);
-        if(status == 0) {
+    _callbackDockerAction : function(funRes) {
+        if(funRes['status'] == 0) {
+            let msg = "`" + funRes['cmd'] + "` terminated successfully";
+            Main.notify(msg);
+            log(msg);
+
             // refresh the menu
-            disable();
-            enable();
+            _refreshMenu();
         } else {
-            let errMsg = "Error occurred when running command line " + cmd + ", please check the error below";
+            let errMsg = "Error occurred when running `" + funRes['cmd'] + "`";
             Main.notify(errMsg);
             log(errMsg);
-            log(err);
-        }
+            log(funRes['err']);
+      }
+    },
+
+    _dockerAction : function() {
+        let dockerCmd = "docker " + this.dockerCommand + " " + this.containerName;
+        let res, out, err, status;
+        async(function() {
+            [res, out, err, status] = GLib.spawn_command_line_sync(dockerCmd);
+            return {
+              cmd: dockerCmd,
+              res: res,
+              out: out,
+              err: err,
+              status: status
+            };
+        }, this._callbackDockerAction);
     }
+
 });
 
 // Menu entry representing a docker container
@@ -101,6 +118,8 @@ const DockerMenu = new Lang.Class({
         let isDockerInstalled = false;
         try {
             let [res, out, err, status] = GLib.spawn_command_line_sync("docker -v");
+            // FIXME maybe we can use GLib method
+            //GLib.find_program_in_path
             isDockerInstalled = (status == 0);
         }
         catch(err) {
@@ -203,4 +222,14 @@ function disable() {
 function _refreshMenu() {
     disable();
     enable();
+}
+
+// Lets you run a function in asynchronous mode
+// @parameter fn : the function to run
+// @parameter callback : the function to call after fn
+function async(fn, callback) {
+    GLib.timeout_add(GLib.PRIORITY_DEFAULT, 0, function() {
+        let funRes = fn();
+        callback(funRes);
+    }, null);
 }
