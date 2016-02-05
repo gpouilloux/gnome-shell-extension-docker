@@ -29,7 +29,6 @@ const DockerMenuItem = new Lang.Class({
     _callbackDockerAction : function(funRes) {
         if(funRes['status'] == 0) {
             let msg = "`" + funRes['cmd'] + "` terminated successfully";
-            Main.notify(msg);
             log(msg);
 
             // refresh the menu
@@ -181,11 +180,12 @@ const DockerMenu = new Lang.Class({
       if(status == 0) {
           let outStr = String.fromCharCode.apply(String, out);
           let dockerContainers = outStr.split('\n');
+          let numberContainers = dockerContainers.length-1;
 
-          this.menu.addAction(dockerContainers.length + " containers (Refresh)", _refreshMenu);
+          this.menu.addAction(numberContainers + " containers (Refresh)", _refreshMenu);
 
           // foreach container, add an entry in the menu
-          for(let i = 0; i < dockerContainers.length-1; i++) {
+          for(let i = 0; i < numberContainers; i++) {
               let [containerName, containerStatusMessage] = dockerContainers[i].split(delimiter);
               let subMenu = new DockerSubMenuMenuItem(containerName, containerStatusMessage);
               this.menu.addMenuItem(subMenu);
