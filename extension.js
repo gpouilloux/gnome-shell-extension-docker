@@ -30,9 +30,6 @@ const DockerMenuItem = new Lang.Class({
         if(funRes['status'] == 0) {
             let msg = "`" + funRes['cmd'] + "` terminated successfully";
             log(msg);
-
-            // refresh the menu
-            _refreshMenu();
         } else {
             let errMsg = "Error occurred when running `" + funRes['cmd'] + "`";
             Main.notify(errMsg);
@@ -105,11 +102,16 @@ const DockerMenu = new Lang.Class({
         hbox.add_child(dockerIcon);
         hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
         this.actor.add_child(hbox);
+        this.actor.connect('button_press_event', Lang.bind(this, this._refreshMenu));
 
-        // TODO refresh the menu everytime the user click on the docker icon
-        //this.actor.connect('button_press_event', enable);
+        this._renderMenu();
+    },
 
-      	this._renderMenu();
+    _refreshMenu : function() {
+        if(this.menu.isOpen) {
+            this.menu.removeAll();
+            this._renderMenu();
+        }
     },
 
     // Checks if docker is installed on the host machine
@@ -159,15 +161,13 @@ const DockerMenu = new Lang.Class({
               this._feedMenu();
           } else {
                   let errMsg = "Docker daemon not started";
-                  this.menu.addAction(errMsg + " " + "(Refresh)", _refreshMenu);
+                  this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
                   log(errMsg);
-                  Main.notify(errMsg);
           }
         } else {
               let errMsg = "Docker binary not found in PATH ";
-              this.menu.addAction(errMsg + " " + "(Refresh)", _refreshMenu);
+              this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
               log(errMsg);
-              Main.notify(errMsg);
         }
         this.actor.show();
     },
@@ -182,8 +182,6 @@ const DockerMenu = new Lang.Class({
           let dockerContainers = outStr.split('\n');
           let numberContainers = dockerContainers.length-1;
 
-          this.menu.addAction(numberContainers + " containers (Refresh)", _refreshMenu);
-
           // foreach container, add an entry in the menu
           for(let i = 0; i < numberContainers; i++) {
               let [containerName, containerStatusMessage] = dockerContainers[i].split(delimiter);
@@ -192,10 +190,9 @@ const DockerMenu = new Lang.Class({
           }
       } else {
           let errMsg = "Error occurred when fetching containers";
-          this.menu.addAction(errMsg + " " + "(Refresh)", _refreshMenu);
+          this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
           log(errMsg);
           log(err);
-          Main.notify(errMsg);
       }
     }
 });
@@ -216,12 +213,6 @@ function enable() {
 // Triggered when extension is disabled
 function disable() {
     _indicator.destroy();
-}
-
-// Refresh the menu by disabling and enabling it
-function _refreshMenu() {
-    disable();
-    enable();
 }
 
 // Lets you run a function in asynchronous mode
