@@ -1,6 +1,8 @@
 // Docker menu extension
 // @author Guillaume Pouilloux <gui.pouilloux@gmail.com>
 
+"use strict";
+
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
@@ -116,18 +118,7 @@ const DockerMenu = new Lang.Class({
 
     // Checks if docker is installed on the host machine
     _isDockerInstalled: function() {
-        let isDockerInstalled = false;
-        try {
-            let [res, out, err, status] = GLib.spawn_command_line_sync("docker -v");
-            // FIXME maybe we can use GLib method
-            //GLib.find_program_in_path
-            isDockerInstalled = (status == 0);
-        }
-        catch(err) {
-            log(err);
-        }
-
-        return isDockerInstalled;
+        return GLib.find_program_in_path('docker') != undefined;
     },
 
     // Checks if the docker daemon is running or not
