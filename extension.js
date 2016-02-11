@@ -4,7 +4,6 @@
 "use strict";
 
 const Main = imports.ui.main;
-const GLib = imports.gi.GLib;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const DockerMenu = Me.imports.src.dockerMenu;
