@@ -89,20 +89,6 @@ const DockerMenu = new Lang.Class({
 
     // Append containers to menu
     _feedMenu: function() {
-        // FIXME bof bof en fait...
-        // let baseMenuDocker = new PopupMenu.PopupBaseMenuItem();
-        // let box = new St.BoxLayout({  });
-        // let gicon = Gio.icon_new_for_string(Me.path + "/icons/docker-color.png");
-        // let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '24'});
-        // box.add(dockerIcon);
-		// box.add(new St.Label({ text: "   Docker" }));
-        //
-        // baseMenuDocker.actor.add_child(box);
-        //
-        // this.menu.addMenuItem(baseMenuDocker);
-        //
-        // // add separator to popup menu
-		// this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         let delimiter = ',';
         let [res, out, err, status] = GLib.spawn_command_line_sync("docker ps -a --format '{{.Names}}" + delimiter + "{{.Status}}'");
