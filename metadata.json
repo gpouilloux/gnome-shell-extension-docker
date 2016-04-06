@@ -1,1 +1,9 @@
-{"uuid": "docker_status@gpouilloux", "shell-version": ["3.18.3"], "description": "Print details about running containers", "name": "docker-status"}
+{
+  "uuid": "docker_status@gpouilloux",
+  "shell-version": [
+    "3.18.3",
+    "3.18.4"
+  ],
+  "description": "Print details about running containers",
+  "name": "docker-status"
+}

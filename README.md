@@ -14,8 +14,18 @@ The following actions are available :
 - Pause
 - Stop
 
+## Screenshot
+
 ![Screenshot](screenshot.jpg)
 
 ## Contribution
 
-Please feel free to contibute.
+Please feel free to contribute.
+
+## License
+
+Licensed under the GNU General Public License Version 2. See COPYING for details.
+
+## Authors
+
+- gpouilloux (Guillaume Pouilloux)
