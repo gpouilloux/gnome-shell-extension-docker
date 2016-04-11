@@ -18,9 +18,13 @@ The following actions are available :
 
 ![Screenshot](screenshot.jpg)
 
+## Installation
+
+You can install this extension by following this [link](https://extensions.gnome.org/extension/1065/docker-status/).
+
 ## Contribution
 
-Please feel free to contribute.
+Please feel free to contribute by sending pull requests or raising issues.
 
 ## License
 
