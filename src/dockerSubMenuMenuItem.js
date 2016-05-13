@@ -31,11 +31,10 @@ const DockerSubMenuMenuItem = new Lang.Class({
 
     _init: function(containerName, containerStatusMessage) {
         this.parent(containerName);
-        let gicon;
+        let gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_red.png");
 
         // Docker container is not running
         if(containerStatusMessage.indexOf("Exited") > -1) {
-            gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_red.png");
             this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "start"));
         }
         // Docker container is up
