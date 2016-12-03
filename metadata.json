@@ -6,6 +6,7 @@
     "3.21",
     "3.22"
   ],
-  "description": "Print details about running containers",
-  "name": "docker-status"
+  "description": "A status menu for managing docker containers.",
+  "name": "Docker Integration",
+  "url": "https://github.com/gpouilloux/gnome-shell-extension-docker"
 }
