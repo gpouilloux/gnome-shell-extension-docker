@@ -13,6 +13,7 @@ The following actions are available :
 - Start
 - Pause
 - Stop
+- Remove
 
 ## Screenshot
 

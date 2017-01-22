@@ -36,6 +36,7 @@ const DockerSubMenuMenuItem = new Lang.Class({
         // Docker container is not running
         if(containerStatusMessage.indexOf("Exited") > -1 || containerStatusMessage.indexOf("Created") > -1) {
             this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "start"));
+            this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "rm"));
         }
         // Docker container is up
         else if(containerStatusMessage.indexOf("Up") > -1) {
