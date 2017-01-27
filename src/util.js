@@ -27,3 +27,11 @@ function async(fn, callback) {
         callback(funRes);
     }, null);
 }
+
+const dockerCommandsToLabels = {
+  'start': 'Start',
+  'stop': 'Stop',
+  'pause': 'Pause',
+  'unpause': 'Unpause',
+  'rm': 'Remove'
+};

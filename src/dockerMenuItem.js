@@ -29,10 +29,7 @@ const DockerMenuItem = new Lang.Class({
     Extends: PopupMenu.PopupMenuItem,
 
     _init : function(containerName, dockerCommand) {
-        let itemLabel = dockerCommand.charAt(0).toUpperCase() + dockerCommand.slice(1);
-        if (itemLabel == "Rm") {
-            itemLabel = "Remove";
-        }
+        let itemLabel = Util.dockerCommandsToLabels[dockerCommand];
       	this.parent(itemLabel);
 
       	this.containerName = containerName;
