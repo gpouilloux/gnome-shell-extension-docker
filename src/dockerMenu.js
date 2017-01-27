@@ -114,11 +114,16 @@ const DockerMenu = new Lang.Class({
             let dockerContainers = outStr.split('\n');
             let numberContainers = dockerContainers.length-1;
 
-            // foreach container, add an entry in the menu
-            for(let i = 0; i < numberContainers; i++) {
-                let [containerName, containerStatusMessage] = dockerContainers[i].split(delimiter);
-                let subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(containerName, containerStatusMessage);
-                this.menu.addMenuItem(subMenu);
+            if (numberContainers) {
+              // foreach container, add an entry in the menu
+              for(let i = 0; i < numberContainers; i++) {
+                  let [containerName, containerStatusMessage] = dockerContainers[i].split(delimiter);
+                  let subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(containerName, containerStatusMessage);
+                  this.menu.addMenuItem(subMenu);
+              }
+            } else {
+              let noContainersMsg = "No containers detected";
+              this.menu.addMenuItem(new PopupMenu.PopupMenuItem(noContainersMsg));
             }
         } else {
             let errMsg = "Error occurred when fetching containers";
