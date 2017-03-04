@@ -36,8 +36,8 @@ const DockerMenu = new Lang.Class({
         this.parent(0.0, _("Docker containers"));
 
         let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
-        let gicon = Gio.icon_new_for_string(Me.path + "/icons/docker.png");
-        let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '30'});
+        let gicon = Gio.icon_new_for_string(Me.path + "/icons/docker.svg");
+        let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '24'});
 
         hbox.add_child(dockerIcon);
         hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
