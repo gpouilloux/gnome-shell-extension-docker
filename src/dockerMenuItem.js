@@ -31,10 +31,6 @@ const DockerMenuItem = new Lang.Class({
     Extends: PopupMenu.PopupMenuItem,
 
     _init : function(containerName, dockerCommand) {
-        this.runCommand(containerName, dockerCommand)
-    },
-
-    runCommand : function(containerName, dockerCommand) {
         let itemLabel = Util.dockerCommandsToLabels[dockerCommand];
       	this.parent(itemLabel);
 

@@ -33,7 +33,7 @@ const DockerSubMenuMenuItem = new Lang.Class({
 
     _init: function(containerName, containerStatusMessage) {
         this.parent(containerName);
-        let statusIcon = new St.Icon({icon_name: 'action-unavailable-symbolic', style_class: 'status-undefined', icon_size: '10'});
+        let statusIcon = new St.Icon({icon_name: 'action-unavailable-symbolic', style_class: 'status-undefined', icon_size: '14'});
 
         let status = 'stopped';
         if(containerStatusMessage.indexOf("Up") > -1) status = 'running';
@@ -42,20 +42,20 @@ const DockerSubMenuMenuItem = new Lang.Class({
         switch(status)
         {
             case "stopped":
-                    statusIcon = new St.Icon({icon_name: 'process-stop-symbolic', style_class: 'status-stopped', icon_size: '10'});
-                    this.menu.addMenuItem(new DockerMenuItem.runCommand(containerName, "start"));
-                    this.menu.addMenuItem(new DockerMenuItem.runCommand(containerName, "rm"));
+                    statusIcon = new St.Icon({icon_name: 'process-stop-symbolic', style_class: 'status-stopped', icon_size: '14'});
+                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "start"));
+                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "rm"));
                 break;
 
             case "running":
-                    statusIcon = new St.Icon({icon_name: 'system-run-symbolic', style_class: 'status-running', icon_size: '10'});
-                    this.menu.addMenuItem(new DockerMenuItem.runCommand(containerName, "pause"));
-                    this.menu.addMenuItem(new DockerMenuItem.runCommand(containerName, "stop"));
+                    statusIcon = new St.Icon({icon_name: 'system-run-symbolic', style_class: 'status-running', icon_size: '14'});
+                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "pause"));
+                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "stop"));
                 break;
 
             case "paused":
-                    statusIcon = new St.Icon({icon_name: 'media-playback-pause-symbolic', style_class: 'status-paused', icon_size: '10'});
-                    this.menu.addMenuItem(new DockerMenuItem.runCommand(containerName, "unpause"));
+                    statusIcon = new St.Icon({icon_name: 'media-playback-pause-symbolic', style_class: 'status-paused', icon_size: '14'});
+                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "unpause"));
                 break;
         }
 
