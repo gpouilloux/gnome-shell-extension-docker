@@ -93,12 +93,12 @@ const DockerMenu = new Lang.Class({
           if(this._isDockerRunning()) {
               this._feedMenu();
           } else {
-                  let errMsg = "Docker daemon not started";
+                  let errMsg = _("Docker daemon not started");
                   this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
                   log(errMsg);
           }
         } else {
-              let errMsg = "Docker binary not found in PATH ";
+              let errMsg = _("Docker binary not found in PATH");
               this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
               log(errMsg);
         }

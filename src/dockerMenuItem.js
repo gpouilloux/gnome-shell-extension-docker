@@ -42,10 +42,10 @@ const DockerMenuItem = new Lang.Class({
 
     _callbackDockerAction : function(funRes) {
         if(funRes['status'] == 0) {
-            let msg = "`" + funRes['cmd'] + "` terminated successfully";
+            let msg = "`" + funRes['cmd'] + "` " + _("terminated successfully");
             log(msg);
         } else {
-            let errMsg = "Error occurred when running `" + funRes['cmd'] + "`";
+            let errMsg = _("Error occurred when running") + " `" + funRes['cmd'] + "`";
             Main.notify(errMsg);
             log(errMsg);
             log(funRes['err']);
