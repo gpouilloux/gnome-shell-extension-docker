@@ -32,14 +32,31 @@ const DockerMenuItem = new Lang.Class({
         let itemLabel = Util.dockerCommandsToLabels[dockerCommand];
       	this.parent(itemLabel);
 
+        this.defaultTerminal = Util.getDefaultTerminal();
+
       	this.containerName = containerName;
         this.dockerCommand = dockerCommand;
 
         this.connect('activate', Lang.bind(this, this._dockerAction));
     },
 
+    _getCommand: function() {
+        let cmd = '';
+
+        // Form docker exec command or the regular one
+        if( this.dockerCommand === 'exec' ) {
+            // This line assumes /bin/bash exists on the contianer
+            cmd += this.defaultTerminal + ' -- docker exec -it ' + this.containerName + ' /bin/bash';
+        } else {
+            cmd += 'docker ' + this.dockerCommand + ' ' + this.containerName;
+        }
+
+        log(cmd)
+        return cmd;
+    },
+
     _callbackDockerAction : function(funRes) {
-        if(funRes['status'] == 0) {
+        if(funRes['status'] === 0) {
             let msg = "`" + funRes['cmd'] + "` terminated successfully";
             log(msg);
         } else {
@@ -51,7 +68,7 @@ const DockerMenuItem = new Lang.Class({
     },
 
     _dockerAction : function() {
-        let dockerCmd = "docker " + this.dockerCommand + " " + this.containerName;
+        let dockerCmd = this._getCommand();
         let res, out, err, status;
         Util.async(function() {
             [res, out, err, status] = GLib.spawn_command_line_sync(dockerCmd);

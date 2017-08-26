@@ -48,6 +48,9 @@ const DockerSubMenuMenuItem = new Lang.Class({
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "pause"));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "stop"));
             }
+
+            // Add option to open a bash terminal inside the container
+            this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "exec"));
         }
 
         let statusIcon = new St.Icon({ gicon: gicon, icon_size: '10'});

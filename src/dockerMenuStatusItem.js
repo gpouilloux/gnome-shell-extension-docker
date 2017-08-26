@@ -44,11 +44,11 @@ const DockerMenuStatusItem = new Lang.Class({
     	let statusCmd = 'sh -c "systemctl is-active docker.service --system; exit;"';
     	let res, out, err, status;
     	[res, out, err, status] = GLib.spawn_command_line_sync(statusCmd);
-    	return (status == 0);
+    	return (status === 0);
 	},
 
 	_callbackDockerAction : function(funRes) {
-        if(funRes['status'] == 0) {
+        if(funRes['status'] === 0) {
             let msg = "`" + funRes['cmd'] + "` terminated successfully";
             log(msg);
         } else {
