@@ -25,6 +25,7 @@ const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const DockerSubMenuMenuItem = Me.imports.src.dockerSubMenuMenuItem;
+const DockerMenuStatusItem = Me.imports.src.dockerMenuStatusItem;
 
 // Docker icon on status menu
 const DockerMenu = new Lang.Class({
@@ -88,13 +89,19 @@ const DockerMenu = new Lang.Class({
     // Show docker menu icon only if installed and append docker containers
     _renderMenu: function() {
         if(this._isDockerInstalled()) {
-          if(this._isDockerRunning()) {
-              this._feedMenu();
-          } else {
-                  let errMsg = "Docker daemon not started";
-                  this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
-                  log(errMsg);
-          }
+			if(this._isDockerRunning()) {
+				this._feedMenu();
+		    } else {
+				let errMsg = "Docker daemon not started";
+				this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+
+				log(errMsg);
+			}
+
+			// Add Turn On / Turn Off Switch always
+			let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('status');
+			this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+			this.menu.addMenuItem(statusSwitch);
         } else {
               let errMsg = "Docker binary not found in PATH ";
               this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
@@ -133,3 +140,4 @@ const DockerMenu = new Lang.Class({
         }
     }
 });
+
