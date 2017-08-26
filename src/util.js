@@ -34,5 +34,4 @@ const dockerCommandsToLabels = {
   'pause': 'Pause',
   'unpause': 'Unpause',
   'rm': 'Remove',
-  'status': 'Docker status',
 };

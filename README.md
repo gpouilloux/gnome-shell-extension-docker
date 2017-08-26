@@ -34,3 +34,4 @@ Licensed under the GNU General Public License Version 2. See COPYING for details
 ## Authors
 
 - gpouilloux (Guillaume Pouilloux)
+- faidoc (Alexandre Filgueira)

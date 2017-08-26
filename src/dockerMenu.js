@@ -99,7 +99,7 @@ const DockerMenu = new Lang.Class({
 			}
 
 			// Add Turn On / Turn Off Switch always
-			let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('status');
+			let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('Docker status');
 			this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 			this.menu.addMenuItem(statusSwitch);
         } else {

@@ -1,7 +1,8 @@
-// Docker menu extension
-// @author Guillaume Pouilloux <gui.pouilloux@gmail.com>
-
 /**
+	Docker menu extension
+	@author Guillaume Pouilloux <gui.pouilloux@gmail.com>
+	@contributor Alexandre Filgueira <faidoc@gmail.com>
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 2 of the License, or
@@ -28,11 +29,7 @@ const DockerMenuStatusItem = new Lang.Class({
     Name: 'DockerMenu.DockerMenuStatusItem',
     Extends: PopupMenu.PopupSwitchMenuItem,
 
-    _init : function(dockerCommand) {
-        let itemLabel = Util.dockerCommandsToLabels[dockerCommand];
-
-        this.dockerCommand = dockerCommand;
-
+    _init : function(itemLabel) {
         // Get current Docker status
         this.dockerStatus = this._getDockerStatus();
         log('Docker status: ' + this.dockerStatus);
