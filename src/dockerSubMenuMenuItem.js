@@ -29,18 +29,18 @@ const DockerSubMenuMenuItem = new Lang.Class({
     Name: 'DockerMenu.DockerSubMenuMenuItem',
     Extends: PopupMenu.PopupSubMenuMenuItem,
 
-    _init: function(containerName, containerStatusMessage) {
+    _init: function (containerName, containerStatusMessage) {
         this.parent(containerName);
         let gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_red.png");
 
         // Docker container is not running
-        if(containerStatusMessage.indexOf("Exited") > -1 || containerStatusMessage.indexOf("Created") > -1) {
+        if (containerStatusMessage.indexOf("Exited") > -1 || containerStatusMessage.indexOf("Created") > -1) {
             this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "start"));
             this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "rm"));
         }
         // Docker container is up
-        else if(containerStatusMessage.indexOf("Up") > -1) {
-            if(containerStatusMessage.indexOf("Paused") > -1) {
+        else if (containerStatusMessage.indexOf("Up") > -1) {
+            if (containerStatusMessage.indexOf("Paused") > -1) {
                 gicon = Gio.icon_new_for_string(Me.path + "/icons/circle_yellow.png");
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "unpause"));
             } else {
@@ -50,7 +50,7 @@ const DockerSubMenuMenuItem = new Lang.Class({
             }
         }
 
-        let statusIcon = new St.Icon({ gicon: gicon, icon_size: '10'});
+        let statusIcon = new St.Icon({ gicon: gicon, icon_size: '10' });
         this.actor.insert_child_at_index(statusIcon, 1);
     }
 });
