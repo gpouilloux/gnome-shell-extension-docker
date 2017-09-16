@@ -71,6 +71,7 @@ const getContainers = () => {
         throw new Error("Error occurred when fetching containers");
 
     return String.fromCharCode.apply(String, out).trim().split('\n')
+        .filter((string) => string.length > 0)
         .map((string) => {
             const values = string.split(',');
             return {
