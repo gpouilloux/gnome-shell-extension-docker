@@ -1,18 +1,20 @@
-// Docker menu extension
-// @author Guillaume Pouilloux <gui.pouilloux@gmail.com>
-
-/**
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
+/*
+ * Gnome3 Docker Menu Extension
+ * Copyright (C) 2017 Guillaume Pouilloux <gui.pouilloux@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 'use strict';
 
@@ -56,11 +58,11 @@ const DockerMenuItem = new Lang.Class({
     },
 
     _callbackDockerAction : function(funRes) {
-        if(funRes['status'] === 0) {
-            let msg = "`" + funRes['cmd'] + "` terminated successfully";
+        if(funRes['status'] == 0) {
+            let msg = "`" + funRes['cmd'] + "` " + _("terminated successfully");
             log(msg);
         } else {
-            let errMsg = "Error occurred when running `" + funRes['cmd'] + "`";
+            let errMsg = _("Error occurred when running") + " `" + funRes['cmd'] + "`";
             Main.notify(errMsg);
             log(errMsg);
             log(funRes['err']);

@@ -1,18 +1,20 @@
-// Docker menu extension
-// @author Guillaume Pouilloux <gui.pouilloux@gmail.com>
-
-/**
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
+/*
+ * Gnome3 Docker Menu Extension
+ * Copyright (C) 2017 Guillaume Pouilloux <gui.pouilloux@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 'use strict';
 
@@ -37,7 +39,7 @@ const DockerMenu = new Lang.Class({
         this.parent(0.0, _("Docker containers"));
 
         let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
-        let gicon = Gio.icon_new_for_string(Me.path + "/icons/docker.svg");
+        let gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
         let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '24'});
 
         hbox.add_child(dockerIcon);
@@ -89,23 +91,22 @@ const DockerMenu = new Lang.Class({
     // Show docker menu icon only if installed and append docker containers
     _renderMenu: function() {
         if(this._isDockerInstalled()) {
-			if(this._isDockerRunning()) {
-				this._feedMenu();
-		    } else {
-				let errMsg = "Docker daemon not started";
-				this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
-
-				log(errMsg);
-			}
-
-			// Add Turn On / Turn Off Switch always
-			let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('Docker status');
-			this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-			this.menu.addMenuItem(statusSwitch);
-        } else {
-              let errMsg = "Docker binary not found in PATH ";
+          if(this._isDockerRunning()) {
+              this._feedMenu();
+          } else {
+              let errMsg = _("Docker daemon not started");
               this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
               log(errMsg);
+          }
+
+          // Add Turn On / Turn Off Switch always
+          let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('Docker status');
+          this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+          this.menu.addMenuItem(statusSwitch);
+        } else {
+          let errMsg = _("Docker binary not found in PATH");
+          this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+          log(errMsg);
         }
         this.actor.show();
     },
