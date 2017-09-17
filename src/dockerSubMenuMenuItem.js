@@ -31,7 +31,7 @@ const DockerSubMenuMenuItem = new Lang.Class({
     Name: 'DockerMenu.DockerSubMenuMenuItem',
     Extends: PopupMenu.PopupSubMenuMenuItem,
 
-    _init: function(containerName, containerStatusMessage) {
+    _init: function (containerName, containerStatusMessage) {
         this.parent(containerName);
         let statusIcon = new St.Icon({icon_name: 'action-unavailable-symbolic', style_class: 'status-undefined', icon_size: '14'});
 
