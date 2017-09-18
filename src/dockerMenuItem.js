@@ -20,6 +20,7 @@
 
 const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
+const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
