@@ -37,9 +37,9 @@ const DockerMenu = new Lang.Class({
     _init: function () {
         this.parent(0.0, _("Docker containers"));
 
-        let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
-        let gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
-        let dockerIcon = new St.Icon({ gicon: gicon, icon_size: '24'});
+        const hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
+        const gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
+        const dockerIcon = new St.Icon({ gicon: gicon, icon_size: '24' });
 
         hbox.add_child(dockerIcon);
         hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
@@ -84,7 +84,7 @@ const DockerMenu = new Lang.Class({
                 containers.forEach((container) => {
                     const subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(container.name, container.status);
                     this.menu.addMenuItem(subMenu);
-                })
+                });
             } else {
                 this.menu.addMenuItem(new PopupMenu.PopupMenuItem("No containers detected"));
             }
