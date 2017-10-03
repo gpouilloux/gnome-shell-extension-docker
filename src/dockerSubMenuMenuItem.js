@@ -18,13 +18,36 @@
 
 'use strict';
 
-const Gio = imports.gi.Gio;
 const St = imports.gi.St;
 const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const DockerMenuItem = Me.imports.src.dockerMenuItem;
+
+/**
+ * Create a St.Icon
+ * @param {String} name The name of the icon 
+ * @param {String} styleClass The style of the icon
+ * @return {Object} an St.Icon instance
+ */
+const createIcon = (name, styleClass) => new St.Icon({ icon_name: name, style_class: styleClass, icon_size: '14' });
+
+/**
+ * Get the status of a container from the status message obtained with the docker command
+ * @param {String} statusMessage The status message
+ * @return {String} The status in ['running', 'paused', 'stopped'] 
+ */
+const getStatus = (statusMessage) => {
+    let status = 'stopped';
+    if (statusMessage.indexOf("Up") > -1)
+        status = 'running';
+
+    if (statusMessage.indexOf("Paused") > -1)
+        status = 'paused';
+
+    return status;
+}
 
 // Menu entry representing a docker container
 const DockerSubMenuMenuItem = new Lang.Class({
@@ -33,32 +56,25 @@ const DockerSubMenuMenuItem = new Lang.Class({
 
     _init: function (containerName, containerStatusMessage) {
         this.parent(containerName);
-        let statusIcon = new St.Icon({icon_name: 'action-unavailable-symbolic', style_class: 'status-undefined', icon_size: '14'});
 
-        let status = 'stopped';
-        if(containerStatusMessage.indexOf("Up") > -1) status = 'running';
-        if(containerStatusMessage.indexOf("Paused") > -1) status = 'paused';
-
-        switch(status)
-        {
+        switch (getStatus(containerStatusMessage)) {
             case "stopped":
-                    statusIcon = new St.Icon({icon_name: 'process-stop-symbolic', style_class: 'status-stopped', icon_size: '14'});
-                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "start"));
-                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "rm"));
+                this.actor.insert_child_at_index(createIcon('process-stop-symbolic', 'status-stopped'), 1);
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "start"));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "rm"));
                 break;
-
             case "running":
-                    statusIcon = new St.Icon({icon_name: 'system-run-symbolic', style_class: 'status-running', icon_size: '14'});
-                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "pause"));
-                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "stop"));
+                this.actor.insert_child_at_index(createIcon('system-run-symbolic', 'status-running'), 1);
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "pause"));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "stop"));
                 break;
-
             case "paused":
-                    statusIcon = new St.Icon({icon_name: 'media-playback-pause-symbolic', style_class: 'status-paused', icon_size: '14'});
-                    this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "unpause"));
+                this.actor.insert_child_at_index(createIcon('media-playback-pause-symbolic', 'status-paused'), 1);
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "unpause"));
+                break;
+            default:
+                this.actor.insert_child_at_index(createIcon('action-unavailable-symbolic', 'status-undefined'), 1);
                 break;
         }
-
-        this.actor.insert_child_at_index(statusIcon, 1);
     }
 });
