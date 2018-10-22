@@ -90,7 +90,7 @@ const getContainers = () => {
 const runCommand = (command, containerName, callback) => {
     const cmd = "docker " + command + " " + containerName;
     async(() => {
-        const [res, out, err, status] = GLib.spawn_command_line_sync(cmd);
+        const [res, out, err, status] = GLib.spawn_command_line_async(cmd);
         return { cmd: cmd, err: err, status: status };
     }, (res) => callback(res.status, res.cmd, res.err));
 }
