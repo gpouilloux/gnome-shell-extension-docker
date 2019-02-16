@@ -1,8 +1,4 @@
-# Gnome shell extension for Docker
-
-## Motivation
-
-During a school project, I had to manage a lot of docker containers. Always going into a terminal to run `docker run xxx` was not really productive, so I decided to develop this extension.
+# Gnome Shell extension for Docker
 
 ## Usage
 
