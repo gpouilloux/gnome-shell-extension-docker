@@ -42,7 +42,6 @@ const DockerMenu = new Lang.Class({
         const dockerIcon = new St.Icon({ gicon: gicon, icon_size: '24' });
 
         hbox.add_child(dockerIcon);
-        hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
         this.actor.add_child(hbox);
         this.actor.connect('button_press_event', Lang.bind(this, this._refreshMenu));
 
