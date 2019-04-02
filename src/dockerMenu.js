@@ -42,7 +42,7 @@ const DockerMenu = GObject.registerClass(
       hbox.add_child(dockerIcon);
       hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
       this.actor.add_child(hbox);
-      this.actor.connect("button_press_event", this, this._refreshMenu);
+      this.actor.connect("button_press_event", this._refreshMenu.bind(this));
 
       this._renderMenu();
     }

@@ -33,7 +33,7 @@ const DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMe
         this.containerName = containerName;
         this.dockerCommand = dockerCommand;
 
-        this.connect('activate', Lang.bind(this, this._dockerAction));
+        this.connect('activate', this._dockerAction.bind(this));
     }
 
     _dockerAction() {
