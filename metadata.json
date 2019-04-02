@@ -6,7 +6,8 @@
     "3.18",
     "3.20",
     "3.21",
-    "3.22"
+    "3.22",
+    "3.32"
   ],
   "description": "A status menu for managing docker containers.",
   "name": "Docker Integration",

@@ -18,7 +18,6 @@
 
 'use strict';
 
-const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -26,20 +25,18 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
 
 // Docker actions for each container
-const DockerMenuItem = new Lang.Class({
-    Name: 'DockerMenu.DockerMenuItem',
-    Extends: PopupMenu.PopupMenuItem,
+const DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenuItem {
 
-    _init: function (containerName, dockerCommand) {
-        this.parent(Docker.dockerCommandsToLabels[dockerCommand]);
+    constructor(containerName, dockerCommand) {
+        super(Docker.dockerCommandsToLabels[dockerCommand]);
 
         this.containerName = containerName;
         this.dockerCommand = dockerCommand;
 
         this.connect('activate', Lang.bind(this, this._dockerAction));
-    },
+    }
 
-    _dockerAction: function () {
+    _dockerAction() {
         Docker.runCommand(this.dockerCommand, this.containerName, (status, command, err) => {
             if (status === 0) {
                 log("`" + command + "` terminated successfully");
@@ -51,4 +48,4 @@ const DockerMenuItem = new Lang.Class({
             }
         });
     }
-});
+};
