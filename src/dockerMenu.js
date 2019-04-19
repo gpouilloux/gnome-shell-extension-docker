@@ -29,8 +29,7 @@ const Docker = Me.imports.src.docker;
 const DockerSubMenuMenuItem = Me.imports.src.dockerSubMenuMenuItem;
 
 // Docker icon on status menu
-const DockerMenu = GObject.registerClass(
-  class DockerMenu_DockerMenu extends PanelMenu.Button {
+var DockerMenu = class DockerMenu_DockerMenu extends PanelMenu.Button {
     // Init the docker menu
     _init() {
       super._init(0.0, _("Docker containers"));
@@ -98,4 +97,4 @@ const DockerMenu = GObject.registerClass(
         log(err);
       }
     }
-  });
+  }

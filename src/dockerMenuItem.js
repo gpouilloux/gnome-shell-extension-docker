@@ -25,7 +25,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
 
 // Docker actions for each container
-const DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenuItem {
+var DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenuItem {
 
     constructor(containerName, dockerCommand) {
         super(Docker.dockerCommandsToLabels[dockerCommand]);
@@ -37,14 +37,16 @@ const DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMe
     }
 
     _dockerAction() {
-        Docker.runCommand(this.dockerCommand, this.containerName, (status, command, err) => {
-            if (status === 0) {
-                log("`" + command + "` terminated successfully");
+        Docker.runCommand(this.dockerCommand, this.containerName, (res) => {
+            if (!!res) {
+                log("`" + this.dockerCommand + "` terminated successfully");
             } else {
-                let errMsg = _("Error occurred when running `" + command + "`");
+                let errMsg = _(
+                    "Docker: Failed to '" + 
+                    this.dockerCommand + "' container '" + this.containerName + "'"
+                );
                 Main.notify(errMsg);
                 log(errMsg);
-                log(err);
             }
         });
     }

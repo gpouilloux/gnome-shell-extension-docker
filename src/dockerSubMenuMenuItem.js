@@ -50,7 +50,7 @@ const getStatus = (statusMessage) => {
 }
 
 // Menu entry representing a docker container
-const DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
+var DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
 
     constructor(containerName, containerStatusMessage) {
         super(containerName);
