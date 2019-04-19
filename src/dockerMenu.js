@@ -39,7 +39,6 @@ var DockerMenu = class DockerMenu_DockerMenu extends PanelMenu.Button {
       const dockerIcon = new St.Icon({ gicon: gicon, icon_size: "24" });
 
       hbox.add_child(dockerIcon);
-      hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
       this.actor.add_child(hbox);
       this.actor.connect("button_press_event", this._refreshMenu.bind(this));
 
