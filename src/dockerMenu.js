@@ -20,7 +20,7 @@
 
 const St = imports.gi.St;
 const Gio = imports.gi.Gio;
-const Lang = imports.lang;
+const GObject = imports.gi.GObject;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -29,69 +29,72 @@ const Docker = Me.imports.src.docker;
 const DockerSubMenuMenuItem = Me.imports.src.dockerSubMenuMenuItem;
 
 // Docker icon on status menu
-const DockerMenu = new Lang.Class({
-    Name: 'DockerMenu.DockerMenu',
-    Extends: PanelMenu.Button,
-
+var DockerMenu = class DockerMenu_DockerMenu extends PanelMenu.Button {
     // Init the docker menu
-    _init: function () {
-        this.parent(0.0, _("Docker containers"));
+    _init() {
+      super._init(0.0, _("Docker containers"));
 
-        const hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
-        const gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
-        const dockerIcon = new St.Icon({ gicon: gicon, icon_size: '24' });
+      const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
+      const gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
+      const dockerIcon = new St.Icon({ gicon: gicon, icon_size: "24" });
 
-        hbox.add_child(dockerIcon);
-        this.actor.add_child(hbox);
-        this.actor.connect('button_press_event', Lang.bind(this, this._refreshMenu));
+      hbox.add_child(dockerIcon);
+      hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
+      this.actor.add_child(hbox);
+      this.actor.connect("button_press_event", this._refreshMenu.bind(this));
 
-        this._renderMenu();
-    },
+      this._renderMenu();
+    }
 
     // Refresh  the menu everytime the user click on it
     // It allows to have up-to-date information on docker containers
-    _refreshMenu: function () {
-        if (this.menu.isOpen) {
-            this.menu.removeAll();
-            this._renderMenu();
-        }
-    },
+    _refreshMenu() {
+      if (this.menu.isOpen) {
+        this.menu.removeAll();
+        this._renderMenu();
+      }
+    }
 
     // Show docker menu icon only if installed and append docker containers
-    _renderMenu: function () {
-        if (Docker.isDockerInstalled()) {
-            if (Docker.isDockerRunning()) {
-                this._feedMenu();
-            } else {
-                let errMsg = _("Docker daemon not started");
-                this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
-                log(errMsg);
-            }
+    _renderMenu() {
+      if (Docker.isDockerInstalled()) {
+        if (Docker.isDockerRunning()) {
+          this._feedMenu();
         } else {
-            let errMsg = _("Docker binary not found in PATH ");
-            this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
-            log(errMsg);
+          let errMsg = _("Docker daemon not started");
+          this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+          log(errMsg);
         }
-        this.actor.show();
-    },
+      } else {
+        let errMsg = _("Docker binary not found in PATH ");
+        this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+        log(errMsg);
+      }
+      this.actor.show();
+    }
 
     // Append containers to menu
-    _feedMenu: function () {
-        try {
-            const containers = Docker.getContainers();
-            if (containers.length > 0) {
-                containers.forEach((container) => {
-                    const subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(container.name, container.status);
-                    this.menu.addMenuItem(subMenu);
-                });
-            } else {
-                this.menu.addMenuItem(new PopupMenu.PopupMenuItem("No containers detected"));
-            }
-        } catch (err) {
-            const errMsg = "Error occurred when fetching containers";
-            this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
-            log(errMsg);
-            log(err);
+    _feedMenu() {
+      try {
+        const containers = Docker.getContainers();
+        if (containers.length > 0) {
+          containers.forEach(container => {
+            const subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(
+              container.name,
+              container.status
+            );
+            this.menu.addMenuItem(subMenu);
+          });
+        } else {
+          this.menu.addMenuItem(
+            new PopupMenu.PopupMenuItem("No containers detected")
+          );
         }
+      } catch (err) {
+        const errMsg = "Error occurred when fetching containers";
+        this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+        log(errMsg);
+        log(err);
+      }
     }
-});
+  }

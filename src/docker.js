@@ -21,7 +21,7 @@
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
-const dockerCommandsToLabels = {
+var dockerCommandsToLabels = {
     start: 'Start',
     stop: 'Stop',
     pause: 'Pause',
@@ -33,13 +33,13 @@ const dockerCommandsToLabels = {
  * Check if docker is installed
  * @return {Boolean} whether docker is installed or not
  */
-const isDockerInstalled = () => !!GLib.find_program_in_path('docker');
+var isDockerInstalled = () => !!GLib.find_program_in_path('docker');
 
 /**
  * Check if docker daemon is running
  * @return {Boolean} whether docker daemon is running or not
  */
-const isDockerRunning = () => {
+var isDockerRunning = () => {
     const [res, pid, in_fd, out_fd, err_fd] = GLib.spawn_async_with_pipes(null, ['/bin/ps', 'cax'], null, 0, null);
 
     const outReader = new Gio.DataInputStream({
@@ -65,7 +65,7 @@ const isDockerRunning = () => {
  * Get an array of containers
  * @return {Array} The array of containers as { name, status }
  */
-const getContainers = () => {
+var getContainers = () => {
     const [res, out, err, status] = GLib.spawn_command_line_sync("docker ps -a --format '{{.Names}},{{.Status}}'");
     if (status !== 0)
         throw new Error("Error occurred when fetching containers");
@@ -87,12 +87,12 @@ const getContainers = () => {
  * @param {String} containerName The container
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
-const runCommand = (command, containerName, callback) => {
+var runCommand = (command, containerName, callback) => {
     const cmd = "docker " + command + " " + containerName;
     async(() => {
-        const [res, out, err, status] = GLib.spawn_command_line_async(cmd);
-        return { cmd: cmd, err: err, status: status };
-    }, (res) => callback(res.status, res.cmd, res.err));
+        const res = GLib.spawn_command_line_async(cmd);
+        return res;
+    }, (res) => callback(res));
 }
 
 /**

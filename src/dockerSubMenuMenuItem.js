@@ -50,12 +50,10 @@ const getStatus = (statusMessage) => {
 }
 
 // Menu entry representing a docker container
-const DockerSubMenuMenuItem = new Lang.Class({
-    Name: 'DockerMenu.DockerSubMenuMenuItem',
-    Extends: PopupMenu.PopupSubMenuMenuItem,
+var DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
 
-    _init: function (containerName, containerStatusMessage) {
-        this.parent(containerName);
+    constructor(containerName, containerStatusMessage) {
+        super(containerName);
 
         switch (getStatus(containerStatusMessage)) {
             case "stopped":
@@ -77,4 +75,4 @@ const DockerSubMenuMenuItem = new Lang.Class({
                 break;
         }
     }
-});
+};
