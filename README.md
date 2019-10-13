@@ -14,7 +14,7 @@ The following actions are available :
 
 ## Screenshot
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.jpg)
 
 ## Installation
 
