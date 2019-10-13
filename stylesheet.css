@@ -1,15 +1,15 @@
 .status-undefined {
-
+  color: lightgray;
 }
 
 .status-stopped {
-    color: red;
+  color: red;
 }
 
 .status-running {
-    color: green;
+  color: green;
 }
 
 .status-paused {
-    color: yellow;
+  color: yellow;
 }

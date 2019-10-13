@@ -1,14 +1,7 @@
 {
-  "uuid": "docker_status@gpouilloux",
-  "shell-version": [
-    "3.14",
-    "3.16",
-    "3.18",
-    "3.20",
-    "3.21",
-    "3.22"
-  ],
-  "description": "A status menu for managing docker containers.",
-  "name": "Docker Integration",
-  "url": "https://github.com/gpouilloux/gnome-shell-extension-docker"
+  "uuid": "easy_docker_containers@red.software.systems",
+  "shell-version": ["3.34"],
+  "description": "A status menu for controlling docker containers.",
+  "name": "Easy Docker Containers",
+  "url": "https://github.com/RedSoftwareSystems/easy_docker_containers"
 }
