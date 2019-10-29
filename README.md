@@ -11,6 +11,7 @@ The following actions are available :
 - Pause
 - Restart
 - Exec
+- Logs
 
 ## Screenshot
 
@@ -23,3 +24,7 @@ You can install this extension by following this [link](https://extensions.gnome
 ## Authors
 
 - kiuma (Andrea Chiumenti)
+
+## Credits
+
+- [gpouilloux \(Guillaume Pouilloux\)](https://github.com/gpouilloux/gnome-shell-extension-docker)

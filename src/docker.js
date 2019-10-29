@@ -2,6 +2,7 @@
 
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
+const Util = imports.misc.util;
 const ByteArray = imports.byteArray;
 
 var dockerCommandsToLabels = {
@@ -10,7 +11,8 @@ var dockerCommandsToLabels = {
   stop: "Stop",
   pause: "Pause",
   unpause: "Unpause",
-  exec: "Exec"
+  exec: "Exec",
+  logs: "Logs"
 };
 
 /**
@@ -41,7 +43,6 @@ var isDockerRunning = () => {
   do {
     const [out, size] = outReader.read_line(null);
     if (out && ByteArray.toString(out).indexOf("docker") > -1) {
-      //if (out && out.toString().indexOf("docker") > -1) {
       dockerRunning = true;
     } else if (size <= 0) {
       hasLine = false;
@@ -83,22 +84,31 @@ var getContainers = () => {
  */
 var runCommand = async (command, containerName, callback) => {
   var cmd = [""];
-  if (command == "exec") {
-    // cmd =
-    //   "gnome-terminal -- sh -c 'docker exec -it " +
-    //   containerName +
-    //   " bash; exec $SHELL' ";
-    cmd = [
-      "gnome-terminal",
-      "--",
-      "sh",
-      "-c",
-      "'docker exec -it " + containerName + " bash; exec $SHELL' "
-    ];
-  } else {
-    cmd = ["docker", command, containerName];
+  switch (command) {
+    case "exec":
+      cmd = [
+        "gnome-terminal",
+        "--",
+        "sh",
+        "-c",
+        "'docker exec -it " + containerName + " bash; exec $SHELL'"
+      ];
+      GLib.spawn_command_line_async(cmd.join(" "));
+      break;
+    case "logs":
+      cmd = [
+        "gnome-terminal",
+        "--",
+        "sh",
+        "-c",
+        "'docker logs -f --tail 2000 " + containerName + "; exec $SHELL' "
+      ];
+      GLib.spawn_command_line_async(cmd.join(" "));
+      break;
+    default:
+      cmd = ["docker", command, containerName];
+      execCommand(cmd, callback);
   }
-  execCommand(cmd, callback);
 };
 
 async function execCommand(
@@ -130,7 +140,7 @@ async function execCommand(
 
         try {
           [ok, stdout, stderr] = proc.communicate_utf8_finish(res);
-          callback(ok, argv.join(" "), ok ? stdout : stderr);
+          callback && callback(ok, argv.join(" "), ok ? stdout : stderr);
           resolve(stdout);
         } catch (e) {
           reject(e);

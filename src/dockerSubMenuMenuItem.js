@@ -1,10 +1,10 @@
 "use strict";
 
 const St = imports.gi.St;
-const PopupMenu = imports.ui.popupMenu;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const DockerMenuItem = Me.imports.src.dockerMenuItem;
+const { PopupSubMenuMenuItem } = imports.ui.popupMenu;
+const extensionUtils = imports.misc.extensionUtils;
+const Me = extensionUtils.getCurrentExtension();
+const { DockerMenuItem } = Me.imports.src.dockerMenuItem;
 const GObject = imports.gi.GObject;
 
 /**
@@ -32,7 +32,7 @@ const getStatus = statusMessage => {
 
 // Menu entry representing a docker container
 var DockerSubMenu = GObject.registerClass(
-  class DockerSubMenu extends PopupMenu.PopupSubMenuMenuItem {
+  class DockerSubMenu extends PopupSubMenuMenuItem {
     _init(containerName, containerStatusMessage) {
       super._init(containerName);
 
@@ -43,7 +43,7 @@ var DockerSubMenu = GObject.registerClass(
             1
           );
           this.menu.addMenuItem(
-            new DockerMenuItem.DockerMenuItem(
+            new DockerMenuItem(
               containerName,
               "start",
               createIcon("media-playback-start-symbolic")
@@ -56,31 +56,31 @@ var DockerSubMenu = GObject.registerClass(
             1
           );
           this.menu.addMenuItem(
-            new DockerMenuItem.DockerMenuItem(
+            new DockerMenuItem(
               containerName,
               "pause",
               createIcon("media-playback-pause-symbolic")
             )
           );
           this.menu.addMenuItem(
-            new DockerMenuItem.DockerMenuItem(
+            new DockerMenuItem(
               containerName,
               "stop",
               createIcon("system-shutdown-symbolic")
             )
           );
           this.menu.addMenuItem(
-            new DockerMenuItem.DockerMenuItem(
+            new DockerMenuItem(
               containerName,
               "restart",
               createIcon("system-reboot-symbolic")
             )
           );
           this.menu.addMenuItem(
-            new DockerMenuItem.DockerMenuItem(
+            new DockerMenuItem(
               containerName,
               "exec",
-              createIcon("system-run-symbolic")
+              createIcon("utilities-terminal-symbolic")
             )
           );
           break;
@@ -90,7 +90,7 @@ var DockerSubMenu = GObject.registerClass(
             1
           );
           this.menu.addMenuItem(
-            new DockerMenuItem.DockerMenuItem(
+            new DockerMenuItem(
               containerName,
               "unpause",
               createIcon("system-refresh-symbolic")
@@ -104,6 +104,14 @@ var DockerSubMenu = GObject.registerClass(
           );
           break;
       }
+
+      this.menu.addMenuItem(
+        new DockerMenuItem(
+          containerName,
+          "logs",
+          createIcon("emblem-documents-symbolic")
+        )
+      );
     }
   }
 );
