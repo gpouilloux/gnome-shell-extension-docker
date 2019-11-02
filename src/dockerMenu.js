@@ -2,17 +2,17 @@
 
 const St = imports.gi.St;
 const Gio = imports.gi.Gio;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+const panelMenu = imports.ui.panelMenu;
+const { arrowIcon, PopupMenuItem } = imports.ui.popupMenu;
+const extensionUtils = imports.misc.extensionUtils;
+const Me = extensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
-const DockerSubMenuMenuItem = Me.imports.src.dockerSubMenuMenuItem;
+const { DockerSubMenu } = Me.imports.src.dockerSubMenuMenuItem;
 const GObject = imports.gi.GObject;
 
 // Docker icon on status menu
 var DockerMenu = GObject.registerClass(
-  class DockerMenu extends PanelMenu.Button {
+  class DockerMenu extends panelMenu.Button {
     _init(menuAlignment, nameText) {
       super._init(menuAlignment, nameText);
 
@@ -21,7 +21,7 @@ var DockerMenu = GObject.registerClass(
       const dockerIcon = new St.Icon({ gicon: gicon, icon_size: "24" });
 
       hbox.add_child(dockerIcon);
-      hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
+      hbox.add_child(arrowIcon(St.Side.BOTTOM));
       this.add_child(hbox);
       this.connect("button_press_event", this._refreshMenu.bind(this));
 
@@ -44,12 +44,12 @@ var DockerMenu = GObject.registerClass(
           this._feedMenu();
         } else {
           let errMsg = _("Docker daemon not started");
-          this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+          this.menu.addMenuItem(new PopupMenuItem(errMsg));
           log(errMsg);
         }
       } else {
         let errMsg = _("Docker binary not found in PATH ");
-        this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+        this.menu.addMenuItem(new PopupMenuItem(errMsg));
         log(errMsg);
       }
       this.show();
@@ -61,20 +61,15 @@ var DockerMenu = GObject.registerClass(
         const containers = Docker.getContainers();
         if (containers.length > 0) {
           containers.forEach(container => {
-            const subMenu = new DockerSubMenuMenuItem.DockerSubMenu(
-              container.name,
-              container.status
-            );
+            const subMenu = new DockerSubMenu(container.name, container.status);
             this.menu.addMenuItem(subMenu);
           });
         } else {
-          this.menu.addMenuItem(
-            new PopupMenu.PopupMenuItem("No containers detected")
-          );
+          this.menu.addMenuItem(new PopupMenuItem("No containers detected"));
         }
       } catch (err) {
         const errMsg = "Error occurred when fetching containers";
-        this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+        this.menu.addMenuItem(new PopupMenuItem(errMsg));
         log(errMsg);
         log(err);
       }

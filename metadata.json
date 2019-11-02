@@ -3,5 +3,6 @@
   "shell-version": ["3.34"],
   "description": "A status menu for controlling docker containers.",
   "name": "Easy Docker Containers",
-  "url": "https://github.com/RedSoftwareSystems/easy_docker_containers"
+  "url": "https://github.com/RedSoftwareSystems/easy_docker_containers",
+  "version": 2
 }

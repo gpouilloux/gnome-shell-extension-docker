@@ -1,15 +1,15 @@
 "use strict";
 
-const PopupMenu = imports.ui.popupMenu;
+const { PopupMenuItem } = imports.ui.popupMenu;
 const Main = imports.ui.main;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+const extensionUtils = imports.misc.extensionUtils;
+const Me = extensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
 const GObject = imports.gi.GObject;
 
 // Docker actions for each container
 var DockerMenuItem = GObject.registerClass(
-  class DockerMenuItem extends PopupMenu.PopupMenuItem {
+  class DockerMenuItem extends PopupMenuItem {
     _init(containerName, dockerCommand, icon) {
       super._init(Docker.dockerCommandsToLabels[dockerCommand]);
       if (icon) {
