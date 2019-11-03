@@ -24,6 +24,7 @@ const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const DockerMenuItem = Me.imports.src.dockerMenuItem;
+const GObject = imports.gi.GObject;
 
 /**
  * Create a St.Icon
@@ -50,10 +51,10 @@ const getStatus = (statusMessage) => {
 }
 
 // Menu entry representing a docker container
-var DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
+var DockerSubMenuMenuItem = GObject.registerClass(class DockerMenu_DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
 
-    constructor(containerName, containerStatusMessage) {
-        super(containerName);
+    _init(containerName, containerStatusMessage) {
+        super._init(containerName);
 
         switch (getStatus(containerStatusMessage)) {
             case "stopped":
@@ -75,4 +76,4 @@ var DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends Popup
                 break;
         }
     }
-};
+});

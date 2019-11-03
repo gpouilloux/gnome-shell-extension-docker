@@ -23,12 +23,13 @@ const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
+const GObject = imports.gi.GObject;
 
 // Docker actions for each container
-var DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenuItem {
+var DockerMenuItem = GObject.registerClass(class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenuItem {
 
-    constructor(containerName, dockerCommand) {
-        super(Docker.dockerCommandsToLabels[dockerCommand]);
+    _init(containerName, dockerCommand) {
+        super._init(Docker.dockerCommandsToLabels[dockerCommand]);
 
         this.containerName = containerName;
         this.dockerCommand = dockerCommand;
@@ -50,4 +51,4 @@ var DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenu
             }
         });
     }
-};
+});
