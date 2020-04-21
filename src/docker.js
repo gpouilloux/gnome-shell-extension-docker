@@ -26,6 +26,7 @@ var dockerCommandsToLabels = {
     stop: 'Stop',
     pause: 'Pause',
     unpause: 'Unpause',
+    restart: 'Restart',
     rm: 'Remove'
 };
 

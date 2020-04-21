@@ -66,6 +66,7 @@ let DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupS
             case "running":
                 this.actor.insert_child_at_index(createIcon('system-run-symbolic', 'status-running'), 1);
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "pause"));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "restart"));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "stop"));
                 break;
             case "paused":
