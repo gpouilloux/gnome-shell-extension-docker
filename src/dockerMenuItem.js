@@ -20,15 +20,17 @@
 
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
+const Config = imports.misc.config;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
+const GObject = imports.gi.GObject;
 
 // Docker actions for each container
-var DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenuItem {
+let DockerMenuItem = class DockerMenuItem extends PopupMenu.PopupMenuItem {
 
-    constructor(containerName, dockerCommand) {
-        super(Docker.dockerCommandsToLabels[dockerCommand]);
+    _init(containerName, dockerCommand) {
+        super._init(Docker.dockerCommandsToLabels[dockerCommand]);
 
         this.containerName = containerName;
         this.dockerCommand = dockerCommand;
@@ -50,4 +52,14 @@ var DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenu
             }
         });
     }
-};
+}
+
+const gnomeShellMajor = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
+const gnomeShellMinor = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
+
+if (gnomeShellMajor === 3 && gnomeShellMinor >= 30) {
+    DockerMenuItem = GObject.registerClass(
+        { GTypeName: 'DockerMenuItem' },
+        DockerMenuItem
+    );
+}

@@ -21,9 +21,11 @@
 const St = imports.gi.St;
 const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
+const Config = imports.misc.config;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const DockerMenuItem = Me.imports.src.dockerMenuItem;
+const GObject = imports.gi.GObject;
 
 /**
  * Create a St.Icon
@@ -50,10 +52,10 @@ const getStatus = (statusMessage) => {
 }
 
 // Menu entry representing a docker container
-var DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
+let DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
 
-    constructor(containerName, containerStatusMessage) {
-        super(containerName);
+    _init(containerName, containerStatusMessage) {
+        super._init(containerName);
 
         switch (getStatus(containerStatusMessage)) {
             case "stopped":
@@ -76,3 +78,13 @@ var DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends Popup
         }
     }
 };
+
+const gnomeShellMajor = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
+const gnomeShellMinor = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
+
+if (gnomeShellMajor === 3 && gnomeShellMinor >= 30) {
+    DockerSubMenuMenuItem = GObject.registerClass(
+        { GTypeName: 'DockerSubMenuMenuItem' },
+        DockerSubMenuMenuItem
+    );
+}

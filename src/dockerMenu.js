@@ -23,77 +23,89 @@ const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const Config = imports.misc.config;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
 const DockerSubMenuMenuItem = Me.imports.src.dockerSubMenuMenuItem;
 
 // Docker icon on status menu
-var DockerMenu = class DockerMenu_DockerMenu extends PanelMenu.Button {
+
+let DockerMenu = class DockerMenu extends PanelMenu.Button {
     // Init the docker menu
     _init() {
-      super._init(0.0, _("Docker containers"));
+        super._init(0.0, _("Docker containers"));
 
-      const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
-      const gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
-      const dockerIcon = new St.Icon({ gicon: gicon, icon_size: "24" });
+        const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
+        const gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
+        const dockerIcon = new St.Icon({ gicon: gicon, icon_size: "24" });
 
-      hbox.add_child(dockerIcon);
-      this.actor.add_child(hbox);
-      this.actor.connect("button_press_event", this._refreshMenu.bind(this));
+        hbox.add_child(dockerIcon);
+        this.actor.add_child(hbox);
+        this.actor.connect("button_press_event", this._refreshMenu.bind(this));
 
-      this._renderMenu();
+        this._renderMenu();
     }
 
     // Refresh  the menu everytime the user click on it
     // It allows to have up-to-date information on docker containers
     _refreshMenu() {
-      if (this.menu.isOpen) {
-        this.menu.removeAll();
-        this._renderMenu();
-      }
+        if (this.menu.isOpen) {
+            this.menu.removeAll();
+            this._renderMenu();
+        }
     }
 
     // Show docker menu icon only if installed and append docker containers
     _renderMenu() {
-      if (Docker.isDockerInstalled()) {
-        if (Docker.isDockerRunning()) {
-          this._feedMenu();
+        if (Docker.isDockerInstalled()) {
+            if (Docker.isDockerRunning()) {
+                this._feedMenu();
+            } else {
+                let errMsg = _("Docker daemon not started");
+                this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+                log(errMsg);
+            }
         } else {
-          let errMsg = _("Docker daemon not started");
-          this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
-          log(errMsg);
+            let errMsg = _("Docker binary not found in PATH ");
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+            log(errMsg);
         }
-      } else {
-        let errMsg = _("Docker binary not found in PATH ");
-        this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
-        log(errMsg);
-      }
-      this.actor.show();
+        this.actor.show();
     }
 
     // Append containers to menu
     _feedMenu() {
-      try {
-        const containers = Docker.getContainers();
-        if (containers.length > 0) {
-          containers.forEach(container => {
-            const subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(
-              container.name,
-              container.status
-            );
-            this.menu.addMenuItem(subMenu);
-          });
-        } else {
-          this.menu.addMenuItem(
-            new PopupMenu.PopupMenuItem("No containers detected")
-          );
+        try {
+            const containers = Docker.getContainers();
+            if (containers.length > 0) {
+                containers.forEach(container => {
+                    const subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(
+                        container.name,
+                        container.status
+                    );
+                    this.menu.addMenuItem(subMenu);
+                });
+            } else {
+                this.menu.addMenuItem(
+                    new PopupMenu.PopupMenuItem("No containers detected")
+                );
+            }
+        } catch (err) {
+            const errMsg = "Error occurred when fetching containers";
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
+            log(errMsg);
+            log(err);
         }
-      } catch (err) {
-        const errMsg = "Error occurred when fetching containers";
-        this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
-        log(errMsg);
-        log(err);
-      }
     }
-  }
+};
+
+const gnomeShellMajor = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
+const gnomeShellMinor = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
+
+if (gnomeShellMajor === 3 && gnomeShellMinor >= 30) {
+    DockerMenu = GObject.registerClass(
+        { GTypeName: 'DockerMenu' },
+        DockerMenu
+    );
+}
