@@ -98,7 +98,7 @@ var runCommand = (command, containerName, callback) => {
 };
 
 /**
- * Spawn a new terminal emulator and run command within it
+ * Spawn a new terminal emulator and run the specified command within it
  * @param {String} command The command to run
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */

@@ -63,8 +63,8 @@ let DockerMenuItem = class DockerMenuItem extends PopupMenu.PopupMenuItem {
                 log("`" + this.dockerCommand + "` terminated successfully");
             } else {
                 let errMsg = _(
-                    "Docker: Failed to '" + 
-                    this.dockerCommand + "' container '" + this.containerName + "'"
+                    "Docker: Failed to run '" + 
+                    this.dockerCommand
                 );
                 Main.notify(errMsg);
                 log(errMsg);
