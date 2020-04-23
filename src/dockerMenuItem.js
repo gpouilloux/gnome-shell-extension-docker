@@ -29,13 +29,47 @@ const GObject = imports.gi.GObject;
 // Docker actions for each container
 let DockerMenuItem = class DockerMenuItem extends PopupMenu.PopupMenuItem {
 
-    _init(containerName, dockerCommand) {
-        super._init(Docker.dockerCommandsToLabels[dockerCommand]);
+    _handleExecCommand(command, containerCommand) {
+        super._init(Docker.dockerCommandsToLabels[containerCommand]);
 
-        this.containerName = containerName;
-        this.dockerCommand = dockerCommand;
+        this.dockerCommand = 'docker ' + command + ' ' + this.containerName + ' ' + containerCommand;
+
+        this.connect('activate', this._terminalEmulatorAction.bind(this));
+    }
+
+    _handleCommonCommand(command) {
+        super._init(Docker.dockerCommandsToLabels[command]);
+
+        this.dockerCommand = command;
 
         this.connect('activate', this._dockerAction.bind(this));
+    }
+
+    _init(containerName, dockerCommand, containerCommand = null) {
+        
+        this.containerName = containerName;
+
+        if (dockerCommand.startsWith('exec')) {
+            this._handleExecCommand(dockerCommand, containerCommand);
+        }
+        else {
+            this._handleCommonCommand(dockerCommand);
+        }
+    }
+
+    _terminalEmulatorAction() {
+        Docker.runInTerminalEmulator(this.dockerCommand, this.containerName, (res) => {
+            if (!!res) {
+                log("`" + this.dockerCommand + "` terminated successfully");
+            } else {
+                let errMsg = _(
+                    "Docker: Failed to '" + 
+                    this.dockerCommand + "' container '" + this.containerName + "'"
+                );
+                Main.notify(errMsg);
+                log(errMsg);
+            }
+        });
     }
 
     _dockerAction() {

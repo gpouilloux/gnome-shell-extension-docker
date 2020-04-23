@@ -27,6 +27,7 @@ var dockerCommandsToLabels = {
     pause: 'Pause',
     unpause: 'Unpause',
     restart: 'Restart',
+    bash: 'Open shell',
     rm: 'Remove'
 };
 
@@ -94,7 +95,18 @@ var runCommand = (command, containerName, callback) => {
         const res = GLib.spawn_command_line_async(cmd);
         return res;
     }, (res) => callback(res));
-}
+};
+
+/**
+ * Spawn a new terminal emulator and run command within it
+ * @param {String} command The command to run
+ * @param {Function} callback A callback that takes the status, command, and stdErr
+ */
+var runInTerminalEmulator = (command, callback) => {
+    async(() => {
+        return GLib.spawn_command_line_async("gnome-terminal -- " + command);
+    }, (res) => callback(res));
+};
 
 /**
  * Run a function in asynchronous mode using GLib
