@@ -88,7 +88,7 @@ var getContainers = () => {
  * @param {Array} tokens The string tokens that form the command
  * @return {String} The options string
  */
-var getCommandOptions = (tokens) => {
+const getCommandOptions = (tokens) => {
     let options = null;
 
     tokens.forEach(token => {
@@ -105,7 +105,7 @@ var getCommandOptions = (tokens) => {
  * @param {String} commandOptions The command options string
  * @return {Boolean} Whether to run interactively or not
  */
-var isCommandInteractive = (commandOptions) => {
+const isCommandInteractive = (commandOptions) => {
     if (commandOptions && commandOptions.includes('i') && commandOptions.includes('t')) {
         return true;
     }
@@ -118,7 +118,7 @@ var isCommandInteractive = (commandOptions) => {
  * @param {String} dockerCommand The Docker command to run
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
-var runBackgroundCommand = (dockerCommand, callback) => {
+const runBackgroundCommand = (dockerCommand, callback) => {
     async(
         () => GLib.spawn_command_line_async(dockerCommand),
         (res) => callback(res)
@@ -130,7 +130,7 @@ var runBackgroundCommand = (dockerCommand, callback) => {
  * @param {String} dockerCommand The Docker command to run
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
-var runInteractiveCommand = (dockerCommand, callback) => {
+const runInteractiveCommand = (dockerCommand, callback) => {
     async(
         () => GLib.spawn_command_line_async("gnome-terminal -- " + dockerCommand),
         (res) => callback(res)
@@ -156,7 +156,6 @@ var runCommand = (command, containerName, callback) => {
         + (commandOptions ? commandOptions + ' ' : '')
         + containerName + ' '
         + (containerCommand ? containerCommand : '');
-    log(completeCommand);
 
     if (isCommandInteractive(commandOptions)) {
         runInteractiveCommand(completeCommand, callback);
