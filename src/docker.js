@@ -27,7 +27,7 @@ var dockerCommandsToLabels = {
     pause: 'Pause',
     unpause: 'Unpause',
     restart: 'Restart',
-    bash: 'Open shell',
+    "exec -it bash": 'Open shell',
     rm: 'Remove'
 };
 
@@ -84,28 +84,86 @@ var getContainers = () => {
 };
 
 /**
- * Run a docker command
+ * Check if the given command string tokens contain a list of options and returns it
+ * @param {Array} tokens The string tokens that form the command
+ * @return {String} The options string
+ */
+var getCommandOptions = (tokens) => {
+    let options = null;
+
+    tokens.forEach(token => {
+        if (token.startsWith('-')) {
+            options = token.substring(token.lastIndexOf('-'));
+        }
+    });
+
+    return options;
+};
+
+/**
+ * Check whether the command has to be run inside an interactive TTY or not
+ * @param {String} commandOptions The command options string
+ * @return {Boolean} Whether to run interactively or not
+ */
+var isCommandInteractive = (commandOptions) => {
+    if (commandOptions && commandOptions.includes('i') && commandOptions.includes('t')) {
+        return true;
+    }
+    
+    return false;
+};
+
+/**
+ * Run the specified command in the background
+ * @param {String} dockerCommand The Docker command to run
+ * @param {Function} callback A callback that takes the status, command, and stdErr
+ */
+var runBackgroundCommand = (dockerCommand, callback) => {
+    async(
+        () => GLib.spawn_command_line_async(dockerCommand),
+        (res) => callback(res)
+    );
+};
+
+/**
+ * Spawn a new terminal emulator and run the specified command within it
+ * @param {String} dockerCommand The Docker command to run
+ * @param {Function} callback A callback that takes the status, command, and stdErr
+ */
+var runInteractiveCommand = (dockerCommand, callback) => {
+    async(
+        () => GLib.spawn_command_line_async("gnome-terminal -- " + dockerCommand),
+        (res) => callback(res)
+    );
+};
+
+/**
+ * Run a Docker command
  * @param {String} command The command to run
  * @param {String} containerName The container
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
 var runCommand = (command, containerName, callback) => {
-    const cmd = "docker " + command + " " + containerName;
-    async(() => {
-        const res = GLib.spawn_command_line_async(cmd);
-        return res;
-    }, (res) => callback(res));
-};
+    const tokens = command.split(' ');
 
-/**
- * Spawn a new terminal emulator and run the specified command within it
- * @param {String} command The command to run
- * @param {Function} callback A callback that takes the status, command, and stdErr
- */
-var runInTerminalEmulator = (command, callback) => {
-    async(() => {
-        return GLib.spawn_command_line_async("gnome-terminal -- " + command);
-    }, (res) => callback(res));
+    const baseCommand = tokens.splice(0, 1);
+    const commandOptions = getCommandOptions(tokens);
+    tokens.splice(tokens.indexOf(commandOptions), 1);
+    const containerCommand = tokens.join(' ');
+
+    const completeCommand = 'docker '
+        + baseCommand + ' '
+        + (commandOptions ? commandOptions + ' ' : '')
+        + containerName + ' '
+        + (containerCommand ? containerCommand : '');
+    log(completeCommand);
+
+    if (isCommandInteractive(commandOptions)) {
+        runInteractiveCommand(completeCommand, callback);
+    }
+    else {
+        runBackgroundCommand(completeCommand, callback);
+    }
 };
 
 /**

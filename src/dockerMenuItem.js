@@ -29,47 +29,13 @@ const GObject = imports.gi.GObject;
 // Docker actions for each container
 let DockerMenuItem = class DockerMenuItem extends PopupMenu.PopupMenuItem {
 
-    _handleExecCommand(command, containerCommand) {
-        super._init(Docker.dockerCommandsToLabels[containerCommand]);
-
-        this.dockerCommand = 'docker ' + command + ' ' + this.containerName + ' ' + containerCommand;
-
-        this.connect('activate', this._terminalEmulatorAction.bind(this));
-    }
-
-    _handleCommonCommand(command) {
-        super._init(Docker.dockerCommandsToLabels[command]);
-
-        this.dockerCommand = command;
-
-        this.connect('activate', this._dockerAction.bind(this));
-    }
-
-    _init(containerName, dockerCommand, containerCommand = null) {
+    _init(containerName, dockerCommand) {
+        super._init(Docker.dockerCommandsToLabels[dockerCommand]);
         
         this.containerName = containerName;
+        this.dockerCommand = dockerCommand;
 
-        if (dockerCommand.startsWith('exec')) {
-            this._handleExecCommand(dockerCommand, containerCommand);
-        }
-        else {
-            this._handleCommonCommand(dockerCommand);
-        }
-    }
-
-    _terminalEmulatorAction() {
-        Docker.runInTerminalEmulator(this.dockerCommand, this.containerName, (res) => {
-            if (!!res) {
-                log("`" + this.dockerCommand + "` terminated successfully");
-            } else {
-                let errMsg = _(
-                    "Docker: Failed to run '" + 
-                    this.dockerCommand
-                );
-                Main.notify(errMsg);
-                log(errMsg);
-            }
-        });
+        this.connect('activate', this._dockerAction.bind(this));
     }
 
     _dockerAction() {
