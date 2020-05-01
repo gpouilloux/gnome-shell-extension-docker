@@ -23,15 +23,15 @@ const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const Config = imports.misc.config;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
 const DockerSubMenuMenuItem = Me.imports.src.dockerSubMenuMenuItem;
+const Utils = Me.imports.src.utils;
 
 // Docker icon on status menu
 
-let DockerMenu = class DockerMenu extends PanelMenu.Button {
+var DockerMenu = class DockerMenu extends PanelMenu.Button {
     // Init the docker menu
     _init() {
         super._init(0.0, _("Docker containers"));
@@ -100,10 +100,7 @@ let DockerMenu = class DockerMenu extends PanelMenu.Button {
     }
 };
 
-const gnomeShellMajor = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
-const gnomeShellMinor = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
-
-if (gnomeShellMajor === 3 && gnomeShellMinor >= 30) {
+if (!Utils.isGnomeShellVersionLegacy()) {
     DockerMenu = GObject.registerClass(
         { GTypeName: 'DockerMenu' },
         DockerMenu

@@ -106,11 +106,9 @@ const getCommandOptions = (tokens) => {
  * @return {Boolean} Whether to run interactively or not
  */
 const isCommandInteractive = (commandOptions) => {
-    if (commandOptions && commandOptions.includes('i') && commandOptions.includes('t')) {
-        return true;
-    }
-    
-    return false;
+    return commandOptions
+        && commandOptions.includes('i')
+        && commandOptions.includes('t');
 };
 
 /**

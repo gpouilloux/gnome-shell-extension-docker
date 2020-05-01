@@ -19,13 +19,13 @@
 'use strict';
 
 const St = imports.gi.St;
+const GObject = imports.gi.GObject;
 const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
-const Config = imports.misc.config;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const DockerMenuItem = Me.imports.src.dockerMenuItem;
-const GObject = imports.gi.GObject;
+const Utils = Me.imports.src.utils;
 
 /**
  * Create a St.Icon
@@ -52,7 +52,7 @@ const getStatus = (statusMessage) => {
 }
 
 // Menu entry representing a docker container
-let DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
+var DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
 
     _init(containerName, containerStatusMessage) {
         super._init(containerName);
@@ -81,10 +81,7 @@ let DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupS
     }
 };
 
-const gnomeShellMajor = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
-const gnomeShellMinor = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
-
-if (gnomeShellMajor === 3 && gnomeShellMinor >= 30) {
+if (!Utils.isGnomeShellVersionLegacy()) {
     DockerSubMenuMenuItem = GObject.registerClass(
         { GTypeName: 'DockerSubMenuMenuItem' },
         DockerSubMenuMenuItem
