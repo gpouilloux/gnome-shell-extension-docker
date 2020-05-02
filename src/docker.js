@@ -27,7 +27,7 @@ var dockerCommandsToLabels = {
     pause: 'Pause',
     unpause: 'Unpause',
     restart: 'Restart',
-    "exec -it bash": 'Open shell',
+    "exec -it /bin/bash": 'Open shell',
     rm: 'Remove'
 };
 
@@ -129,8 +129,13 @@ const runBackgroundCommand = (dockerCommand, callback) => {
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
 const runInteractiveCommand = (dockerCommand, callback) => {
+    const defaultShell = GLib.getenv("SHELL");
+
     async(
-        () => GLib.spawn_command_line_async("gnome-terminal -- " + dockerCommand),
+        () => GLib.spawn_command_line_async("gnome-terminal -- "
+            + defaultShell + " -c '"
+            + dockerCommand + "; "
+            + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'"),
         (res) => callback(res)
     );
 };
