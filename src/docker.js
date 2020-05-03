@@ -27,7 +27,7 @@ var dockerCommandsToLabels = {
     pause: 'Pause',
     unpause: 'Unpause',
     restart: 'Restart',
-    "exec -it /bin/bash": 'Open shell',
+    "exec -it shell": 'Open shell',
     rm: 'Remove'
 };
 
@@ -101,6 +101,21 @@ const getCommandOptions = (tokens) => {
 };
 
 /**
+ * Receives an alias for the command to run and returns the actual command to
+ * run and a list of other commands to fallback to in case of failure
+ * @param {String} containerCommandString An alias for the command to run
+ * @return {Array} The command to run and a list of fallback options for it
+ */
+const parseContainerCommand = (containerCommandString) => {
+    switch (containerCommandString) {
+        case 'shell':
+            return ['/bin/bash', '/bin/sh'];
+        default:
+            return [];
+    }
+};
+
+/**
  * Check whether the command has to be run inside an interactive TTY or not
  * @param {String} commandOptions The command options string
  * @return {Boolean} Whether to run interactively or not
@@ -131,11 +146,13 @@ const runBackgroundCommand = (dockerCommand, callback) => {
 const runInteractiveCommand = (dockerCommand, callback) => {
     const defaultShell = GLib.getenv("SHELL");
 
+    let commandToRun = "gnome-terminal -- "
+        + defaultShell + " -c '"
+        + dockerCommand
+        + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'";
+
     async(
-        () => GLib.spawn_command_line_async("gnome-terminal -- "
-            + defaultShell + " -c '"
-            + dockerCommand + "; "
-            + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'"),
+        () => GLib.spawn_command_line_async(commandToRun),
         (res) => callback(res)
     );
 };
@@ -152,19 +169,28 @@ var runCommand = (command, containerName, callback) => {
     const baseCommand = tokens.splice(0, 1);
     const commandOptions = getCommandOptions(tokens);
     tokens.splice(tokens.indexOf(commandOptions), 1);
-    const containerCommand = tokens.join(' ');
+    const containerCommandAlternatives = parseContainerCommand(tokens.join(' '));
 
-    const completeCommand = 'docker '
+    const dockerCommand = 'docker '
         + baseCommand + ' '
         + (commandOptions ? commandOptions + ' ' : '')
-        + containerName + ' '
-        + (containerCommand ? containerCommand : '');
+        + containerName;
 
     if (isCommandInteractive(commandOptions)) {
+        const dockerCommandAlternatives = containerCommandAlternatives
+            .map(containerCommand => dockerCommand + ' ' + containerCommand);
+
+        let completeCommand = dockerCommandAlternatives.splice(0, 1) + "; ";
+
+        dockerCommandAlternatives
+            .forEach(dockerCommand => completeCommand += "if [ $? -ne 0 ]; then "
+                + dockerCommand + "; fi; "
+            );
+
         runInteractiveCommand(completeCommand, callback);
     }
     else {
-        runBackgroundCommand(completeCommand, callback);
+        runBackgroundCommand(dockerCommand, callback);
     }
 };
 
