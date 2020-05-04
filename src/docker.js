@@ -116,11 +116,49 @@ const parseContainerCommand = (containerCommandString) => {
 };
 
 /**
+ * Parse the given command string and return a valid Docker command
+ * to be run on the specified container
+ * @param {String} commandString The string with the command to be parsed
+ * @param {String} containerName The name of the container on which to run the command
+ * @returns {String} The complete Docker command to run
+ */
+const getDockerCommand = (commandString, containerName) => {
+    const tokens = commandString.split(' ');
+
+    const baseCommand = tokens.splice(0, 1);
+    const commandOptions = getCommandOptions(tokens);
+    tokens.splice(tokens.indexOf(commandOptions), 1);
+    const containerCommandAlternatives = parseContainerCommand(tokens.join(' '));
+
+    let dockerCommand = 'docker '
+        + baseCommand + ' '
+        + (commandOptions ? commandOptions + ' ' : '')
+        + containerName;
+
+    if (containerCommandAlternatives.length > 0) {
+        let completeCommand = dockerCommand + ' '
+            + containerCommandAlternatives.splice(0, 1) + "; ";
+
+        containerCommandAlternatives
+            .forEach(containerCommand => completeCommand += "if [ $? -ne 0 ]; then "
+                + dockerCommand + ' ' + containerCommand + "; fi; "
+            );
+        
+        dockerCommand = completeCommand;
+    }
+
+    return dockerCommand;
+};
+
+/**
  * Check whether the command has to be run inside an interactive TTY or not
  * @param {String} commandOptions The command options string
  * @return {Boolean} Whether to run interactively or not
  */
-const isCommandInteractive = (commandOptions) => {
+const isCommandInteractive = (commandString) => {
+    const tokens = commandString.split(' ');
+    const commandOptions = getCommandOptions(tokens);
+
     return commandOptions
         && commandOptions.includes('i')
         && commandOptions.includes('t');
@@ -146,50 +184,29 @@ const runBackgroundCommand = (dockerCommand, callback) => {
 const runInteractiveCommand = (dockerCommand, callback) => {
     const defaultShell = GLib.getenv("SHELL");
 
-    let commandToRun = "gnome-terminal -- "
+    const terminalCommand = "gnome-terminal -- "
         + defaultShell + " -c '"
         + dockerCommand
         + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'";
 
     async(
-        () => GLib.spawn_command_line_async(commandToRun),
+        () => GLib.spawn_command_line_async(terminalCommand),
         (res) => callback(res)
     );
 };
 
 /**
  * Run a Docker command
- * @param {String} command The command to run
+ * @param {String} commandString The command to run
  * @param {String} containerName The container
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
-var runCommand = (command, containerName, callback) => {
-    const tokens = command.split(' ');
+var runCommand = (commandString, containerName, callback) => {
+    const dockerCommand = getDockerCommand(commandString, containerName);
 
-    const baseCommand = tokens.splice(0, 1);
-    const commandOptions = getCommandOptions(tokens);
-    tokens.splice(tokens.indexOf(commandOptions), 1);
-    const containerCommandAlternatives = parseContainerCommand(tokens.join(' '));
-
-    const dockerCommand = 'docker '
-        + baseCommand + ' '
-        + (commandOptions ? commandOptions + ' ' : '')
-        + containerName;
-
-    if (isCommandInteractive(commandOptions)) {
-        let completeCommand = dockerCommand + ' '
-            + containerCommandAlternatives.splice(0, 1) + "; ";
-
-        containerCommandAlternatives
-            .forEach(containerCommand => completeCommand += "if [ $? -ne 0 ]; then "
-                + dockerCommand + ' ' + containerCommand + "; fi; "
-            );
-
-        runInteractiveCommand(completeCommand, callback);
-    }
-    else {
-        runBackgroundCommand(dockerCommand, callback);
-    }
+    isCommandInteractive(dockerCommand) ?
+        runInteractiveCommand(dockerCommand, callback)
+        : runBackgroundCommand(dockerCommand, callback);
 };
 
 /**
