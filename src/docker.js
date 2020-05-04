@@ -177,14 +177,12 @@ var runCommand = (command, containerName, callback) => {
         + containerName;
 
     if (isCommandInteractive(commandOptions)) {
-        const dockerCommandAlternatives = containerCommandAlternatives
-            .map(containerCommand => dockerCommand + ' ' + containerCommand);
+        let completeCommand = dockerCommand + ' '
+            + containerCommandAlternatives.splice(0, 1) + "; ";
 
-        let completeCommand = dockerCommandAlternatives.splice(0, 1) + "; ";
-
-        dockerCommandAlternatives
-            .forEach(dockerCommand => completeCommand += "if [ $? -ne 0 ]; then "
-                + dockerCommand + "; fi; "
+        containerCommandAlternatives
+            .forEach(containerCommand => completeCommand += "if [ $? -ne 0 ]; then "
+                + dockerCommand + ' ' + containerCommand + "; fi; "
             );
 
         runInteractiveCommand(completeCommand, callback);
