@@ -21,14 +21,76 @@
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
-var dockerCommandsToLabels = {
-    start: 'Start',
-    stop: 'Stop',
-    pause: 'Pause',
-    unpause: 'Unpause',
-    restart: 'Restart',
-    "exec -it shell": 'Open shell',
-    rm: 'Remove'
+/**
+ * Enum for Docker actions
+ * @readonly
+ * @enum {String}
+ */
+var DockerActions = Object.freeze({
+    START: "START",
+    REMOVE: "REMOVE",
+    OPEN_SHELL: "OPEN_SHELL",
+    RESTART: "RESTART",
+    PAUSE: "PAUSE",
+    STOP: "STOP",
+    UNPAUSE: "UNPAUSE"
+});
+
+/**
+ * Return the text label associated to the given Docker action
+ * @param {DockerActions} dockerAction The Docker action
+ * @return {String} The label associated to the Docker action
+ * @throws {Error}
+ */
+var getDockerActionLabel = (dockerAction) => {
+    switch (dockerAction) {
+        case DockerActions.START:
+            return "Start";
+        case DockerActions.REMOVE:
+            return "Remove";
+        case DockerActions.OPEN_SHELL:
+            return "Open shell";
+        case DockerActions.RESTART:
+            return "Restart";
+        case DockerActions.PAUSE:
+            return "Pause";
+        case DockerActions.STOP:
+            return "Stop";
+        case DockerActions.UNPAUSE:
+            return "Unpause";
+        default:
+            throw new Error("Docker action not valid");
+            break;
+    }
+};
+
+/**
+ * Return the command associated to the given Docker action
+ * @param {DockerActions} dockerAction The Docker action
+ * @param {String} containerName The name of the container on which to run the command
+ * @returns {String} The complete Docker command to run
+ * @throws {Error}
+ */
+const getDockerActionCommand = (dockerAction, containerName) => {
+    switch (dockerAction) {
+        case DockerActions.START:
+            return "docker start " + containerName;
+        case DockerActions.REMOVE:
+            return "docker rm " + containerName;
+        case DockerActions.OPEN_SHELL:
+            return "docker exec -it " + containerName + " /bin/bash; "
+                + "if [ $? -ne 0 ]; then docker exec -it " + containerName + " /bin/sh; fi;";
+        case DockerActions.RESTART:
+            return "docker restart " + containerName;
+        case DockerActions.PAUSE:
+            return "docker pause " + containerName;
+        case DockerActions.STOP:
+            return "docker stop " + containerName;
+        case DockerActions.UNPAUSE:
+            return "docker unpause " + containerName;
+        default:
+            throw new Error("Docker action not valid");
+    }
 };
 
 /**
@@ -101,56 +163,6 @@ const getCommandOptions = (tokens) => {
 };
 
 /**
- * Receives an alias for the command to run and returns the actual command to
- * run and a list of other commands to fallback to in case of failure
- * @param {String} containerCommandString An alias for the command to run
- * @return {Array} The command to run and a list of fallback options for it
- */
-const parseContainerCommand = (containerCommandString) => {
-    switch (containerCommandString) {
-        case 'shell':
-            return ['/bin/bash', '/bin/sh'];
-        default:
-            return [];
-    }
-};
-
-/**
- * Parse the given command string and return a valid Docker command
- * to be run on the specified container
- * @param {String} commandString The string with the command to be parsed
- * @param {String} containerName The name of the container on which to run the command
- * @returns {String} The complete Docker command to run
- */
-const getDockerCommand = (commandString, containerName) => {
-    const tokens = commandString.split(' ');
-
-    const baseCommand = tokens.splice(0, 1);
-    const commandOptions = getCommandOptions(tokens);
-    tokens.splice(tokens.indexOf(commandOptions), 1);
-    const containerCommandAlternatives = parseContainerCommand(tokens.join(' '));
-
-    let dockerCommand = 'docker '
-        + baseCommand + ' '
-        + (commandOptions ? commandOptions + ' ' : '')
-        + containerName;
-
-    if (containerCommandAlternatives.length > 0) {
-        let completeCommand = dockerCommand + ' '
-            + containerCommandAlternatives.splice(0, 1) + "; ";
-
-        containerCommandAlternatives
-            .forEach(containerCommand => completeCommand += "if [ $? -ne 0 ]; then "
-                + dockerCommand + ' ' + containerCommand + "; fi; "
-            );
-        
-        dockerCommand = completeCommand;
-    }
-
-    return dockerCommand;
-};
-
-/**
  * Check whether the command has to be run inside an interactive TTY or not
  * @param {String} commandOptions The command options string
  * @return {Boolean} Whether to run interactively or not
@@ -188,6 +200,7 @@ const runInteractiveCommand = (dockerCommand, callback) => {
         + defaultShell + " -c '"
         + dockerCommand
         + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'";
+    log(terminalCommand);
 
     async(
         () => GLib.spawn_command_line_async(terminalCommand),
@@ -196,13 +209,13 @@ const runInteractiveCommand = (dockerCommand, callback) => {
 };
 
 /**
- * Run a Docker command
- * @param {String} commandString The command to run
+ * Run a Docker action
+ * @param {String} dockerAction The action to run
  * @param {String} containerName The container
- * @param {Function} callback A callback that takes the status, command, and stdErr
+ * @param {Function} callback A callback that takes the status, action, and stdErr
  */
-var runCommand = (commandString, containerName, callback) => {
-    const dockerCommand = getDockerCommand(commandString, containerName);
+var runAction = (dockerAction, containerName, callback) => {
+    const dockerCommand = getDockerActionCommand(dockerAction, containerName);
 
     isCommandInteractive(dockerCommand) ?
         runInteractiveCommand(dockerCommand, callback)

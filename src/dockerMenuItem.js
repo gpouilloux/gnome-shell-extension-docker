@@ -29,23 +29,23 @@ const Utils = Me.imports.src.utils;
 // Docker actions for each container
 var DockerMenuItem = class DockerMenuItem extends PopupMenu.PopupMenuItem {
 
-    _init(containerName, dockerCommand) {
-        super._init(Docker.dockerCommandsToLabels[dockerCommand]);
+    _init(containerName, dockerAction) {
+        super._init(Docker.getDockerActionLabel(dockerAction));
         
         this.containerName = containerName;
-        this.dockerCommand = dockerCommand;
+        this.dockerAction = dockerAction;
 
         this.connect('activate', this._dockerAction.bind(this));
     }
 
     _dockerAction() {
-        Docker.runCommand(this.dockerCommand, this.containerName, (res) => {
+        Docker.runAction(this.dockerAction, this.containerName, (res) => {
             if (!!res) {
-                log("`" + this.dockerCommand + "` terminated successfully");
+                log("Docker: `" + this.dockerAction + "` action terminated successfully");
             } else {
                 let errMsg = _(
                     "Docker: Failed to '" + 
-                    this.dockerCommand + "' container '" + this.containerName + "'"
+                    this.dockerAction + "' container '" + this.containerName + "'"
                 );
                 Main.notify(errMsg);
                 log(errMsg);
