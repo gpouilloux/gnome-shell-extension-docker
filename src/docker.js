@@ -22,47 +22,40 @@ const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
 /**
- * Enum for Docker actions
+ * Dictionary for Docker actions
  * @readonly
- * @enum {String}
+ * @type {{Object.<String, {label: String, isInteractive: Boolean}>}}
  */
 var DockerActions = Object.freeze({
-    START: "START",
-    REMOVE: "REMOVE",
-    OPEN_SHELL: "OPEN_SHELL",
-    RESTART: "RESTART",
-    PAUSE: "PAUSE",
-    STOP: "STOP",
-    UNPAUSE: "UNPAUSE"
+    START: {
+        label: "Start",
+        isInteractive: false
+    },
+    REMOVE: {
+        label: "Remove",
+        isInteractive: false
+    },
+    OPEN_SHELL: {
+        label: "Open shell",
+        isInteractive: true
+    },
+    RESTART: {
+        label: "Restart",
+        isInteractive: false
+    },
+    PAUSE: {
+        label: "Pause",
+        isInteractive: false
+    },
+    STOP: {
+        label: "Stop",
+        isInteractive: false
+    },
+    UNPAUSE: {
+        label: "Unpause",
+        isInteractive: false
+    },
 });
-
-/**
- * Return the text label associated to the given Docker action
- * @param {DockerActions} dockerAction The Docker action
- * @return {String} The label associated to the Docker action
- * @throws {Error}
- */
-var getDockerActionLabel = (dockerAction) => {
-    switch (dockerAction) {
-        case DockerActions.START:
-            return "Start";
-        case DockerActions.REMOVE:
-            return "Remove";
-        case DockerActions.OPEN_SHELL:
-            return "Open shell";
-        case DockerActions.RESTART:
-            return "Restart";
-        case DockerActions.PAUSE:
-            return "Pause";
-        case DockerActions.STOP:
-            return "Stop";
-        case DockerActions.UNPAUSE:
-            return "Unpause";
-        default:
-            throw new Error("Docker action not valid");
-            break;
-    }
-};
 
 /**
  * Return the command associated to the given Docker action
@@ -71,6 +64,7 @@ var getDockerActionLabel = (dockerAction) => {
  * @returns {String} The complete Docker command to run
  * @throws {Error}
  */
+
 const getDockerActionCommand = (dockerAction, containerName) => {
     switch (dockerAction) {
         case DockerActions.START:
@@ -146,37 +140,6 @@ var getContainers = () => {
 };
 
 /**
- * Check if the given command string tokens contain a list of options and returns it
- * @param {Array} tokens The string tokens that form the command
- * @return {String} The options string
- */
-const getCommandOptions = (tokens) => {
-    let options = null;
-
-    tokens.forEach(token => {
-        if (token.startsWith('-')) {
-            options = token.substring(token.lastIndexOf('-'));
-        }
-    });
-
-    return options;
-};
-
-/**
- * Check whether the command has to be run inside an interactive TTY or not
- * @param {String} commandOptions The command options string
- * @return {Boolean} Whether to run interactively or not
- */
-const isCommandInteractive = (commandString) => {
-    const tokens = commandString.split(' ');
-    const commandOptions = getCommandOptions(tokens);
-
-    return commandOptions
-        && commandOptions.includes('i')
-        && commandOptions.includes('t');
-};
-
-/**
  * Run the specified command in the background
  * @param {String} dockerCommand The Docker command to run
  * @param {Function} callback A callback that takes the status, command, and stdErr
@@ -200,7 +163,6 @@ const runInteractiveCommand = (dockerCommand, callback) => {
         + defaultShell + " -c '"
         + dockerCommand
         + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'";
-    log(terminalCommand);
 
     async(
         () => GLib.spawn_command_line_async(terminalCommand),
@@ -217,7 +179,7 @@ const runInteractiveCommand = (dockerCommand, callback) => {
 var runAction = (dockerAction, containerName, callback) => {
     const dockerCommand = getDockerActionCommand(dockerAction, containerName);
 
-    isCommandInteractive(dockerCommand) ?
+    dockerAction.isInteractive ?
         runInteractiveCommand(dockerCommand, callback)
         : runBackgroundCommand(dockerCommand, callback);
 };

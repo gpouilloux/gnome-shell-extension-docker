@@ -30,7 +30,7 @@ const Utils = Me.imports.src.utils;
 var DockerMenuItem = class DockerMenuItem extends PopupMenu.PopupMenuItem {
 
     _init(containerName, dockerAction) {
-        super._init(Docker.getDockerActionLabel(dockerAction));
+        super._init(dockerAction.label);
         
         this.containerName = containerName;
         this.dockerAction = dockerAction;
@@ -41,7 +41,7 @@ var DockerMenuItem = class DockerMenuItem extends PopupMenu.PopupMenuItem {
     _dockerAction() {
         Docker.runAction(this.dockerAction, this.containerName, (res) => {
             if (!!res) {
-                log("Docker: `" + this.dockerAction + "` action terminated successfully");
+                log("Docker: `" + this.dockerAction.label + "` action terminated successfully");
             } else {
                 let errMsg = _(
                     "Docker: Failed to '" + 
