@@ -18,36 +18,47 @@
 
 'use strict';
 
+const GObject = imports.gi.GObject;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
+const Utils = Me.imports.src.utils;
 
 // Docker actions for each container
-var DockerMenuItem = class DockerMenu_DockerMenuItem extends PopupMenu.PopupMenuItem {
+var DockerMenuItem = class DockerMenuItem extends PopupMenu.PopupMenuItem {
 
-    constructor(containerName, dockerCommand) {
-        super(Docker.dockerCommandsToLabels[dockerCommand]);
-
+    _init(containerName, dockerAction) {
+        super._init(dockerAction.label);
+        
         this.containerName = containerName;
-        this.dockerCommand = dockerCommand;
+        this.dockerAction = dockerAction;
 
         this.connect('activate', this._dockerAction.bind(this));
     }
 
     _dockerAction() {
-        Docker.runCommand(this.dockerCommand, this.containerName, (res) => {
+        Docker.runAction(this.dockerAction, this.containerName, (res) => {
             if (!!res) {
-                log("`" + this.dockerCommand + "` terminated successfully");
+                log("Docker: `" + this.dockerAction.label + "` action terminated successfully");
             } else {
                 let errMsg = _(
                     "Docker: Failed to '" + 
-                    this.dockerCommand + "' container '" + this.containerName + "'"
+                    this.dockerAction + "' container '" + this.containerName + "'"
                 );
                 Main.notify(errMsg);
                 log(errMsg);
             }
         });
     }
-};
+}
+
+
+
+if (!Utils.isGnomeShellVersionLegacy()) {
+    DockerMenuItem = GObject.registerClass(
+        { GTypeName: 'DockerMenuItem' },
+        DockerMenuItem
+    );
+}

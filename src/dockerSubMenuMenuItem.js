@@ -19,11 +19,14 @@
 'use strict';
 
 const St = imports.gi.St;
+const GObject = imports.gi.GObject;
 const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const DockerActions = Me.imports.src.docker.DockerActions;
 const DockerMenuItem = Me.imports.src.dockerMenuItem;
+const Utils = Me.imports.src.utils;
 
 /**
  * Create a St.Icon
@@ -50,25 +53,27 @@ const getStatus = (statusMessage) => {
 }
 
 // Menu entry representing a docker container
-var DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
+var DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupSubMenuMenuItem {
 
-    constructor(containerName, containerStatusMessage) {
-        super(containerName);
+    _init(containerName, containerStatusMessage) {
+        super._init(containerName);
 
         switch (getStatus(containerStatusMessage)) {
             case "stopped":
                 this.actor.insert_child_at_index(createIcon('process-stop-symbolic', 'status-stopped'), 1);
-                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "start"));
-                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "rm"));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.START));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.REMOVE));
                 break;
             case "running":
                 this.actor.insert_child_at_index(createIcon('system-run-symbolic', 'status-running'), 1);
-                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "pause"));
-                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "stop"));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.OPEN_SHELL));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.RESTART));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.PAUSE));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.STOP));
                 break;
             case "paused":
                 this.actor.insert_child_at_index(createIcon('media-playback-pause-symbolic', 'status-paused'), 1);
-                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, "unpause"));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.UNPAUSE));
                 break;
             default:
                 this.actor.insert_child_at_index(createIcon('action-unavailable-symbolic', 'status-undefined'), 1);
@@ -76,3 +81,10 @@ var DockerSubMenuMenuItem = class DockerMenu_DockerSubMenuMenuItem extends Popup
         }
     }
 };
+
+if (!Utils.isGnomeShellVersionLegacy()) {
+    DockerSubMenuMenuItem = GObject.registerClass(
+        { GTypeName: 'DockerSubMenuMenuItem' },
+        DockerSubMenuMenuItem
+    );
+}

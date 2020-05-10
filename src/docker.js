@@ -21,12 +21,70 @@
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
-var dockerCommandsToLabels = {
-    start: 'Start',
-    stop: 'Stop',
-    pause: 'Pause',
-    unpause: 'Unpause',
-    rm: 'Remove'
+/**
+ * Dictionary for Docker actions
+ * @readonly
+ * @type {{Object.<String, {label: String, isInteractive: Boolean}>}}
+ */
+var DockerActions = Object.freeze({
+    START: {
+        label: "Start",
+        isInteractive: false
+    },
+    REMOVE: {
+        label: "Remove",
+        isInteractive: false
+    },
+    OPEN_SHELL: {
+        label: "Open shell",
+        isInteractive: true
+    },
+    RESTART: {
+        label: "Restart",
+        isInteractive: false
+    },
+    PAUSE: {
+        label: "Pause",
+        isInteractive: false
+    },
+    STOP: {
+        label: "Stop",
+        isInteractive: false
+    },
+    UNPAUSE: {
+        label: "Unpause",
+        isInteractive: false
+    },
+});
+
+/**
+ * Return the command associated to the given Docker action
+ * @param {DockerActions} dockerAction The Docker action
+ * @param {String} containerName The name of the container on which to run the command
+ * @returns {String} The complete Docker command to run
+ * @throws {Error}
+ */
+
+const getDockerActionCommand = (dockerAction, containerName) => {
+    switch (dockerAction) {
+        case DockerActions.START:
+            return "docker start " + containerName;
+        case DockerActions.REMOVE:
+            return "docker rm " + containerName;
+        case DockerActions.OPEN_SHELL:
+            return "docker exec -it " + containerName + " /bin/bash; "
+                + "if [ $? -ne 0 ]; then docker exec -it " + containerName + " /bin/sh; fi;";
+        case DockerActions.RESTART:
+            return "docker restart " + containerName;
+        case DockerActions.PAUSE:
+            return "docker pause " + containerName;
+        case DockerActions.STOP:
+            return "docker stop " + containerName;
+        case DockerActions.UNPAUSE:
+            return "docker unpause " + containerName;
+        default:
+            throw new Error("Docker action not valid");
+    }
 };
 
 /**
@@ -82,18 +140,49 @@ var getContainers = () => {
 };
 
 /**
- * Run a docker command
- * @param {String} command The command to run
- * @param {String} containerName The container
+ * Run the specified command in the background
+ * @param {String} dockerCommand The Docker command to run
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
-var runCommand = (command, containerName, callback) => {
-    const cmd = "docker " + command + " " + containerName;
-    async(() => {
-        const res = GLib.spawn_command_line_async(cmd);
-        return res;
-    }, (res) => callback(res));
-}
+const runBackgroundCommand = (dockerCommand, callback) => {
+    async(
+        () => GLib.spawn_command_line_async(dockerCommand),
+        (res) => callback(res)
+    );
+};
+
+/**
+ * Spawn a new terminal emulator and run the specified command within it
+ * @param {String} dockerCommand The Docker command to run
+ * @param {Function} callback A callback that takes the status, command, and stdErr
+ */
+const runInteractiveCommand = (dockerCommand, callback) => {
+    const defaultShell = GLib.getenv("SHELL");
+
+    const terminalCommand = "gnome-terminal -- "
+        + defaultShell + " -c '"
+        + dockerCommand
+        + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'";
+
+    async(
+        () => GLib.spawn_command_line_async(terminalCommand),
+        (res) => callback(res)
+    );
+};
+
+/**
+ * Run a Docker action
+ * @param {String} dockerAction The action to run
+ * @param {String} containerName The container
+ * @param {Function} callback A callback that takes the status, action, and stdErr
+ */
+var runAction = (dockerAction, containerName, callback) => {
+    const dockerCommand = getDockerActionCommand(dockerAction, containerName);
+
+    dockerAction.isInteractive ?
+        runInteractiveCommand(dockerCommand, callback)
+        : runBackgroundCommand(dockerCommand, callback);
+};
 
 /**
  * Run a function in asynchronous mode using GLib
