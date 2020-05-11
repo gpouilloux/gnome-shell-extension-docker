@@ -31,7 +31,7 @@ const Utils = Me.imports.src.utils;
 
 // Docker icon on status menu
 
-var DockerMenu = class DockerMenu extends PanelMenu.Button {
+var DockerMenu = GObject.registerClass(class DockerMenu extends PanelMenu.Button {
     // Init the docker menu
     _init() {
         super._init(0.0, _("Docker containers"));
@@ -98,7 +98,7 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
             log(err);
         }
     }
-};
+});
 
 if (!Utils.isGnomeShellVersionLegacy()) {
     DockerMenu = GObject.registerClass(
