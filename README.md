@@ -7,9 +7,11 @@ When installing this extension, you will be able to manage your docker container
 The following actions are available :
 
 - Start
+- Remove
 - Pause
 - Stop
-- Remove
+- Restart
+- Exec shell
 
 ## Screenshot
 
@@ -25,7 +27,7 @@ Please feel free to contribute by sending pull requests or raising issues.
 
 ## License
 
-Licensed under the GNU General Public License Version 2. See COPYING for details.
+Licensed under the GNU General Public License Version 3. See COPYING for details.
 
 ## Authors
 
