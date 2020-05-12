@@ -1,6 +1,6 @@
 /*
  * Gnome3 Docker Menu Extension
- * Copyright (C) 2017 Guillaume Pouilloux <gui.pouilloux@gmail.com>
+ * Copyright (C) 2020 Guillaume Pouilloux <gui.pouilloux@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,60 +20,48 @@
 
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
+const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.src.utils;
 
-// Docker actions for each container
 var DockerMenuStatusItem = class DockerMenuStatusItem extends PopupMenu.PopupSwitchMenuItem {
 
     _init(itemLabel) {
-        // Get current Docker status
         this.dockerStatus = this._getDockerStatus();
-        log('Docker status: ' + this.dockerStatus);
 
-        // Set Switch state
         super._init(itemLabel, this.dockerStatus);
 
         this.connect('activate', this._dockerAction.bind(this));
     }
 
     _getDockerStatus() {
-    	let statusCmd = 'sh -c "systemctl is-active docker.service --system; exit;"';
-    	let res, out, err, status;
-    	[res, out, err, status] = GLib.spawn_command_line_sync(statusCmd);
-    	return (status == 0);
+    	const statusCmd = "systemctl is-active docker.service --system";
+    	const [res, out, err, status] = GLib.spawn_command_line_sync(statusCmd);
+
+        return (status == 0);
 	}
 
-	_callbackDockerAction(funRes) {
-        if(funRes['status'] == 0) {
-            let msg = "`" + funRes['cmd'] + "` terminated successfully";
-            log(msg);
-        } else {
-            let errMsg = "Error occurred when running `" + funRes['cmd'] + "`";
-            Main.notify(errMsg);
-            log(errMsg);
-            log(funRes['err']);
-    	}
-    }
-
     _dockerAction() {
-    	// TODO: Detect if systemctl and pkexec are installed
-    	let serviceAction = this.dockerStatus ? 'stop' : 'start';
-        let dockerCmd = 'sh -c "pkexec --user root systemctl ' + serviceAction + ' docker.service --system; exit;"';
-        let res, out, err, status;
-        log("Let's " + serviceAction + " Docker...");
-        Utils.async(function() {
-            [res, out, err, status] = GLib.spawn_command_line_async(dockerCmd);
-            return {
-              cmd: dockerCmd,
-              res: res,
-              out: out,
-              err: err,
-              status: status
-            };
-        }, this._callbackDockerAction);
+    	const serviceAction = this.dockerStatus ? 'stop' : 'start';
+        const dockerCmd = "pkexec --user root systemctl " + serviceAction + " docker.service --system";
+
+        Utils.async(
+            () => GLib.spawn_command_line_async(dockerCmd),
+            (res) => {
+                if(!!res) {
+                    log("Docker: `daemon " + serviceAction + "` action successfully dispatched");
+                } else {
+                    const errMsg = "Docker: error occurred when dispatching `daemon " + serviceAction + "` action";
+
+                    Main.notify(errMsg);
+                    log(errMsg);
+                }
+
+                return GLib.SOURCE_REMOVE;
+            }
+        );
     }
 };
 
