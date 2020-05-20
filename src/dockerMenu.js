@@ -41,8 +41,8 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
         const dockerIcon = new St.Icon({ gicon: gicon, icon_size: "24" });
 
         hbox.add_child(dockerIcon);
-        this.actor.add_child(hbox);
-        this.actor.connect("button_press_event", this._refreshMenu.bind(this));
+        this.add_child(hbox);
+        this.connect("button_press_event", this._refreshMenu.bind(this));
 
         this._renderMenu();
     }
@@ -71,7 +71,7 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
             this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
             log(errMsg);
         }
-        this.actor.show();
+        this.show();
     }
 
     // Append containers to menu
