@@ -20,6 +20,9 @@
 
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Utils = Me.imports.src.utils;
 
 /**
  * Dictionary for Docker actions
@@ -108,12 +111,16 @@ var isDockerRunning = () => {
     let hasLine = true;
     do {
         const [out, size] = outReader.read_line(null);
-        if (out && out.toString().indexOf("docker") > -1) {
-            dockerRunning = true;
+
+        if (out) {
+            const outString = Utils.getByteArrayString(out);
+
+            if (outString && outString.indexOf("docker") > -1) {
+                dockerRunning = true;
+            }
         } else if (size <= 0) {
             hasLine = false;
         }
-
     } while (!dockerRunning && hasLine);
 
     return dockerRunning;
