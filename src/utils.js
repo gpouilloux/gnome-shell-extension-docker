@@ -25,5 +25,5 @@ var isGnomeShellVersionLegacy = () => {
     const gnomeShellMinor = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
 
     return gnomeShellMajor < 3 ||
-        (gnomeShellMajor === 3 && gnomeShellMinor < 30);
+        (gnomeShellMajor === 3 && gnomeShellMinor <= 30);
 };
