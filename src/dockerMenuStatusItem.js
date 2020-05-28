@@ -45,7 +45,7 @@ var DockerMenuStatusItem = class DockerMenuStatusItem extends PopupMenu.PopupSwi
 
     _dockerAction() {
     	const serviceAction = this.dockerStatus ? 'stop' : 'start';
-        const dockerCmd = "pkexec --user root systemctl " + serviceAction + " docker.service --system";
+        const dockerCmd = 'sh -c "pkexec --user root systemctl ' + serviceAction + ' docker.service --system"';
 
         Utils.async(
             () => GLib.spawn_command_line_async(dockerCmd),
