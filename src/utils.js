@@ -18,6 +18,7 @@
 
 'use strict';
 
+const GLib = imports.gi.GLib;
 const Config = imports.misc.config;
 
 var isGnomeShellVersionLegacy = () => {
@@ -27,3 +28,10 @@ var isGnomeShellVersionLegacy = () => {
     return gnomeShellMajor < 3 ||
         (gnomeShellMajor === 3 && gnomeShellMinor <= 30);
 };
+
+/**
+ * Run a function in asynchronous mode using GLib
+ * @param {Function} fn The function to run
+ * @param {Function} callback The callback to call after fn
+ */
+var async = (fn, callback) => GLib.timeout_add(GLib.PRIORITY_DEFAULT, 0, () => callback(fn()));

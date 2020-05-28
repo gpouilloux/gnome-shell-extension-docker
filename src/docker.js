@@ -20,6 +20,9 @@
 
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Utils = Me.imports.src.utils;
 
 /**
  * Dictionary for Docker actions
@@ -145,7 +148,7 @@ var getContainers = () => {
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
 const runBackgroundCommand = (dockerCommand, callback) => {
-    async(
+    Utils.async(
         () => GLib.spawn_command_line_async(dockerCommand),
         (res) => callback(res)
     );
@@ -164,7 +167,7 @@ const runInteractiveCommand = (dockerCommand, callback) => {
         + dockerCommand
         + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'";
 
-    async(
+    Utils.async(
         () => GLib.spawn_command_line_async(terminalCommand),
         (res) => callback(res)
     );
@@ -183,10 +186,3 @@ var runAction = (dockerAction, containerName, callback) => {
         runInteractiveCommand(dockerCommand, callback)
         : runBackgroundCommand(dockerCommand, callback);
 };
-
-/**
- * Run a function in asynchronous mode using GLib
- * @param {Function} fn The function to run
- * @param {Function} callback The callback to call after fn
- */
-const async = (fn, callback) => GLib.timeout_add(GLib.PRIORITY_DEFAULT, 0, () => callback(fn()));
