@@ -18,9 +18,8 @@
 
 'use strict';
 
-const St = imports.gi.St;
-const Gio = imports.gi.Gio;
-const GObject = imports.gi.GObject;
+const { Clutter, St, Gio, GObject } = imports.gi;
+
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -36,14 +35,16 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
     _init() {
         super._init(0.0, _("Docker containers"));
 
+        this.clutterActor = this instanceof Clutter.Actor ? this : this.actor;
+
         const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
         const gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
         const dockerIcon = new St.Icon({ gicon: gicon, icon_size: "24" });
 
         hbox.add_child(dockerIcon);
-        this.add_child(hbox);
-        this.connect("button_press_event", this._refreshMenu.bind(this));
-
+        this.clutterActor.add_child(hbox);
+        this.clutterActor.connect("button_press_event", this._refreshMenu.bind(this));
+        
         this._renderMenu();
     }
 
@@ -71,7 +72,7 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
             this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
             log(errMsg);
         }
-        this.show();
+        this.clutterActor.show();
     }
 
     // Append containers to menu
