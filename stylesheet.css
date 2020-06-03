@@ -1,15 +1,17 @@
+/* Container icon colors */
+
 .status-undefined {
-  color: lightgray;
+	color: #9e9e9e;
 }
 
 .status-stopped {
-  color: red;
+	color: #ff3d00;
 }
 
 .status-running {
-  color: green;
+	color: #00c853;
 }
 
 .status-paused {
-  color: yellow;
+	color: #00b0ff;
 }

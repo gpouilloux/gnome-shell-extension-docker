@@ -22,6 +22,19 @@ var dockerCommandsToLabels = {
 var isDockerInstalled = () => !!GLib.find_program_in_path("docker");
 
 /**
+ * Check if Linux user is in 'docker' group (to manage Docker without 'sudo')
+ * @return {Boolean} whether current Linux user is in 'docker' group or not
+ */
+var isUserInDockerGroup = () => {
+  const _userName = GLib.get_user_name();
+  let _userGroups = GLib.spawn_command_line_sync("groups " + _userName)[1].toString();
+  let _inDockerGroup = false;
+  if (_userGroups.match(/\sdocker[\s\n]/g)) _inDockerGroup = true; // Regex search for ' docker ' or ' docker' in Linux user's groups
+
+  return _inDockerGroup;
+};
+
+/**
  * Check if docker daemon is running
  * @return {Boolean} whether docker daemon is running or not
  */
@@ -54,7 +67,7 @@ var isDockerRunning = () => {
 
 /**
  * Get an array of containers
- * @return {Array} The array of containers as { name, status }
+ * @return {Array} The array of containers as { project, name, status }
  */
 var getContainers = () => {
   const [res, out, err, status] = GLib.spawn_command_line_sync(
@@ -69,7 +82,16 @@ var getContainers = () => {
     .filter(string => string.length > 0)
     .map(string => {
       const values = string.split(",");
+
+      // Get 'docker-compose' project name for the container
+      let projectName = GLib.spawn_command_line_sync("docker inspect -f '{{index .Config.Labels \"com.docker.compose.project\"}}' " + values[0])[1].toString();
+      projectName = projectName.replace("\n", "");
+      projectName = projectName.toUpperCase();
+      projectName = projectName;
+      if (projectName != "" ) projectName = projectName + " ∘ ";
+
       return {
+        project: projectName,
         name: values[0],
         status: values[1]
       };
@@ -77,7 +99,7 @@ var getContainers = () => {
 };
 
 /**
- * Run a docker command
+ * Run a Docker command
  * @param {String} command The command to run
  * @param {String} containerName The container
  * @param {Function} callback A callback that takes the status, command, and stdErr
@@ -87,19 +109,19 @@ var runCommand = async (command, containerName, callback) => {
   switch (command) {
     case "exec":
       cmd = [
-        "gnome-terminal",
-        "--",
-        "sh",
-        "-c",
+        "x-terminal-emulator",
+        "-e",
+        "bash",
+        "-c",      
         "'docker exec -it " + containerName + " bash; exec $SHELL'"
       ];
       GLib.spawn_command_line_async(cmd.join(" "));
       break;
     case "logs":
       cmd = [
-        "gnome-terminal",
-        "--",
-        "sh",
+        "x-terminal-emulator",
+        "-e",
+        "bash",
         "-c",
         "'docker logs -f --tail 2000 " + containerName + "; exec $SHELL' "
       ];

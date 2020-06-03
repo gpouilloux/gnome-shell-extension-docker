@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="docker-container-unavailable-symbolic.svg"
+   id="svg17"
+   version="1.1"
+   fill="none"
+   viewBox="0 0 16 16"
+   height="16"
+   width="16">
+  <metadata
+     id="metadata21">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     inkscape:snap-global="false"
+     inkscape:current-layer="svg17"
+     inkscape:cy="8.1857782"
+     inkscape:cx="12.339239"
+     inkscape:zoom="45.254834"
+     borderlayer="true"
+     inkscape:pagecheckerboard="true"
+     showgrid="true"
+     id="namedview19"
+     inkscape:window-height="480"
+     inkscape:window-width="640"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     inkscape:document-rotation="0"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:lockguides="false">
+    <inkscape:grid
+       empopacity="0.25098039"
+       empcolor="#1a73e8"
+       opacity="0.05098039"
+       color="#1a73e8"
+       empspacing="2"
+       spacingy="0.5"
+       spacingx="0.5"
+       type="xygrid"
+       id="grid13"
+       enabled="true"
+       dotted="false" />
+  </sodipodi:namedview>
+  <defs
+     id="defs15">
+    <inkscape:path-effect
+       message="Use fill-rule evenodd on &lt;b&gt;fill and stroke&lt;/b&gt; dialog if no flatten result after convert clip to paths."
+       hide_clip="false"
+       flatten="false"
+       inverse="true"
+       lpeversion="1"
+       is_visible="true"
+       id="path-effect851"
+       effect="powerclip" />
+    <clipPath
+       id="clip0">
+      <rect
+         id="rect12"
+         fill="white"
+         height="16"
+         width="16" />
+    </clipPath>
+    <clipPath
+       id="clipPath845"
+       clipPathUnits="userSpaceOnUse">
+      <path
+         d="M -4,-4 H 19 V 20 H -4 Z M 6.997855,9.1721598 h 1.0087424 q 0,-0.1613988 0.00807,-0.274378 0.00807,-0.1170145 0.036315,-0.2138535 Q 8.0832622,8.587089 8.1518567,8.4942847 8.2204512,8.4014804 8.3415003,8.2804313 8.5392139,8.1069275 8.7328925,7.9253538 8.9306061,7.7397452 9.083935,7.5379966 9.2372639,7.3322131 9.3341035,7.0981848 q 0.096839,-0.2380633 0.096839,-0.5245462 0,-0.3873572 -0.1291191,-0.6819101 Q 9.1727043,5.5971756 8.9265711,5.399462 8.6844729,5.1977135 8.3293954,5.0968392 7.974318,4.995965 7.5264362,4.995965 q -0.3994621,0 -0.7424346,0.1008742 Q 6.4410291,5.1936785 6.1868259,5.3954271 5.9326227,5.5971756 5.7833288,5.9038334 5.6340349,6.2064562 5.6299999,6.6180232 h 1.1257569 q 0.00404,-0.1856086 0.068594,-0.3187627 0.068594,-0.133154 0.1735037,-0.2178884 0.1089443,-0.084734 0.2461333,-0.1210488 0.137189,-0.04035 0.2824479,-0.04035 0.3792873,0 0.5770009,0.1694688 0.1977135,0.1694687 0.1977135,0.5366511 0,0.1533289 -0.068594,0.3066578 Q 8.1639621,7.0860799 8.0509829,7.2353738 7.9420387,7.3806327 7.8048497,7.5218567 7.6676607,7.6590457 7.5304717,7.7841298 7.3408281,7.9334238 7.2359188,8.0665778 7.13101,8.1956969 7.078555,8.3530607 7.0261,8.5063896 7.00996,8.7000682 6.997855,8.8937468 6.997855,9.1721598 Z M 6.8324212,10.394756 q 0,0.129119 0.044385,0.242098 0.044385,0.112979 0.1291191,0.193679 0.084734,0.08069 0.2057835,0.125084 0.1210491,0.04842 0.274378,0.04842 0.1492939,0 0.2703431,-0.04842 0.1250844,-0.04438 0.2098184,-0.125084 0.084734,-0.0807 0.1291191,-0.193679 0.04842,-0.112979 0.04842,-0.242098 0,-0.133154 -0.04842,-0.246133 -0.044385,-0.117014 -0.1291191,-0.2017488 -0.084734,-0.084734 -0.2098184,-0.129119 -0.1210492,-0.04842 -0.2703431,-0.04842 -0.1533289,0 -0.274378,0.04842 -0.1210495,0.044385 -0.2057835,0.129119 -0.084734,0.084735 -0.1291191,0.2017488 -0.044385,0.112979 -0.044385,0.246133 z"
+         class="powerclip"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:8.26362px;line-height:1.25;font-family:'Roboto Mono for Powerline';-inkscape-font-specification:'Roboto Mono for Powerline, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.20659"
+         id="lpe_path-effect851" />
+    </clipPath>
+  </defs>
+  <path
+     d="M 7.5,1 1,4 v 8 L 7.5,15 14,12 V 4 Z"
+     clip-path="url(#clipPath845)"
+     inkscape:label="Icon"
+     style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-variant-east-asian:normal;font-feature-settings:normal;font-variation-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;shape-margin:0;inline-size:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#deddda;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate;stop-color:#000000"
+     id="full&amp;half" />
+</svg>

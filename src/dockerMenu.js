@@ -1,7 +1,7 @@
 "use strict";
 
 const St = imports.gi.St;
-const Gio = imports.gi.Gio;
+const Gio = imports.gi.Gio; // For custom icons
 const panelMenu = imports.ui.panelMenu;
 const { arrowIcon, PopupMenuItem } = imports.ui.popupMenu;
 const extensionUtils = imports.misc.extensionUtils;
@@ -10,21 +10,17 @@ const Docker = Me.imports.src.docker;
 const { DockerSubMenu } = Me.imports.src.dockerSubMenuMenuItem;
 const GObject = imports.gi.GObject;
 
-// Docker icon on status menu
+// Docker icon as panel menu
 var DockerMenu = GObject.registerClass(
   class DockerMenu extends panelMenu.Button {
     _init(menuAlignment, nameText) {
       super._init(menuAlignment, nameText);
-
-      const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
-      const gicon = Gio.icon_new_for_string(Me.path + "/docker.svg");
-      const dockerIcon = new St.Icon({ gicon: gicon, icon_size: "24" });
-
-      hbox.add_child(dockerIcon);
-      hbox.add_child(arrowIcon(St.Side.BOTTOM));
-      this.add_child(hbox);
+      
+      // Custom Docker icon as menu button
+      const gioIcon = (name = "docker-symbolic") => Gio.icon_new_for_string(Me.path + "/icons/" + name + ".svg");
+      const panelIcon = (name = "docker-symbolic", styleClass = "system-status-icon") => new St.Icon({ gicon: gioIcon(name), style_class: styleClass, icon_size: "16" });
+      this.actor.add_child(panelIcon("docker-symbolic",));
       this.connect("button_press_event", this._refreshMenu.bind(this));
-
       this._renderMenu();
     }
 
@@ -36,32 +32,38 @@ var DockerMenu = GObject.registerClass(
         this._renderMenu();
       }
     }
-
-    // Show docker menu icon only if installed and append docker containers
+    
+    // Show docker menu icon only if installed, append docker containers, and manageable with current user without 'sudo'
     _renderMenu() {
       if (Docker.isDockerInstalled()) {
-        if (Docker.isDockerRunning()) {
-          this._feedMenu();
+        if (Docker.isUserInDockerGroup()) {
+          if (Docker.isDockerRunning()) {
+            this._feedMenu();
+          } else {
+            let errMsg = _("Please start your Docker service first!\n(Seems Docker daemon not started yet.)");
+            this.menu.addMenuItem(new PopupMenuItem(errMsg));
+            log(errMsg);
+          }
         } else {
-          let errMsg = _("Docker daemon not started");
+          let errMsg = _("Please put your Linux user into `docker` group first!\n(Seems not in that yet.)");
           this.menu.addMenuItem(new PopupMenuItem(errMsg));
           log(errMsg);
         }
       } else {
-        let errMsg = _("Docker binary not found in PATH ");
+        let errMsg = _("Please properly install Docker service first!\n(Seems Docker binary not found in PATH yet.)");
         this.menu.addMenuItem(new PopupMenuItem(errMsg));
         log(errMsg);
       }
       this.show();
     }
-
+    
     // Append containers to menu
     _feedMenu() {
       try {
         const containers = Docker.getContainers();
         if (containers.length > 0) {
           containers.forEach(container => {
-            const subMenu = new DockerSubMenu(container.name, container.status);
+            const subMenu = new DockerSubMenu(container.project, container.name, container.status);
             this.menu.addMenuItem(subMenu);
           });
         } else {

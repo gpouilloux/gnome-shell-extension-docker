@@ -1,8 +1,8 @@
 {
-  "uuid": "easy_docker_containers@red.software.systems",
-  "shell-version": ["3.34"],
-  "description": "A status menu for controlling docker containers.",
   "name": "Easy Docker Containers",
+  "uuid": "easy_docker_containers@red.software.systems",
+  "description": "A GNOME Shell extension (GNOME Panel applet) to be able to generally control your available Docker containers.",
   "url": "https://github.com/RedSoftwareSystems/easy_docker_containers",
-  "version": 2
+  "version": 4,
+  "shell-version": ["3.34", "3.36"]
 }
