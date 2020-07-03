@@ -113,7 +113,7 @@ var runCommand = async (command, containerName, callback) => {
         "-e",
         "bash",
         "-c",      
-        "'docker exec -it " + containerName + " bash; exec $SHELL'"
+        "'docker exec -it " + containerName + " sh; exec $SHELL'"
       ];
       GLib.spawn_command_line_async(cmd.join(" "));
       break;
