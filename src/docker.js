@@ -22,6 +22,7 @@ const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const ConfirmationModal = Me.imports.src.confirmationModal;
 const Utils = Me.imports.src.utils;
 
 /**
@@ -36,7 +37,8 @@ var DockerActions = Object.freeze({
     },
     REMOVE: {
         label: "Remove",
-        isInteractive: false
+        isInteractive: false,
+        needsConfirmation: true
     },
     OPEN_SHELL: {
         label: "Open shell",
@@ -182,7 +184,16 @@ const runInteractiveCommand = (dockerCommand, callback) => {
 var runAction = (dockerAction, containerName, callback) => {
     const dockerCommand = getDockerActionCommand(dockerAction, containerName);
 
-    dockerAction.isInteractive ?
-        runInteractiveCommand(dockerCommand, callback)
-        : runBackgroundCommand(dockerCommand, callback);
+    const action = () => {
+        dockerAction.isInteractive ?
+            runInteractiveCommand(dockerCommand, callback)
+            : runBackgroundCommand(dockerCommand, callback);
+    };
+
+    const label = dockerAction.label.toLowerCase();
+    dockerAction.needsConfirmation ?
+        new ConfirmationModal.ConfirmationModal(
+            "Are you sure you want to " + label + " " + containerName + " container?",
+            action
+        ) : action();
 };
