@@ -29,21 +29,25 @@ const Utils = Me.imports.src.utils;
 
 var ConfirmationModal = class ConfirmationModal extends ModalDialog.ModalDialog {
 
-    _init(message, action, actionParams = []) {
+    _init(message, callback, callbackParams = []) {
         super._init();
 
-        this.action = action;
-        this.actionParams = actionParams;
+        this.message = message;
+        this.callback = callback;
+        this.callbackParams = callbackParams;
 
-        this._buildLayout(message);
+        this._buildLayout();
         this.open();
     }
 
-    _buildLayout(message) {
-        const content = new Dialog.MessageDialogContent({
-            title: "Confirm action",
-            description: message
-        });
+    _buildLayout() {
+        const messageDialogContentParams = {
+            title: "Confirm action"
+        };
+        Dialog.MessageDialogContent.prototype.hasOwnProperty("description")
+            ? messageDialogContentParams.description = this.message
+            : messageDialogContentParams.subtitle = this.message;
+        const content = new Dialog.MessageDialogContent(messageDialogContentParams);
         this.contentLayout.add_actor(content);
 
         const cancelButton = {
@@ -54,19 +58,14 @@ var ConfirmationModal = class ConfirmationModal extends ModalDialog.ModalDialog 
         };
         const confirmButton = {
             label: _("Confirm"),
-            action: Lang.bind(this, this._confirmAction),
-            key: Clutter.KEY_Return || Clutter.Return
+            action: Lang.bind(this, this._confirmAction)
         };
         this.setButtons([cancelButton, confirmButton]);
     }
 
-    _runAction() {
-        this.action(...this.actionParams);
-    }
-
     _confirmAction() {
         this.close();
-        this._runAction();
+        this.callback(...this.callbackParams);
     }
 
     _cancelAction() {
