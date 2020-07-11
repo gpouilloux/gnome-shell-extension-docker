@@ -22,41 +22,49 @@ const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const ConfirmationModal = Me.imports.src.confirmationModal;
 const Utils = Me.imports.src.utils;
 
 /**
  * Dictionary for Docker actions
  * @readonly
- * @type {{Object.<String, {label: String, isInteractive: Boolean}>}}
+ * @type {{Object.<String, {label: String, isInteractive: Boolean, needsConfirmation: Boolean}>}}
  */
 var DockerActions = Object.freeze({
     START: {
         label: "Start",
-        isInteractive: false
+        isInteractive: false,
+        needsConfirmation: false
     },
     REMOVE: {
         label: "Remove",
-        isInteractive: false
+        isInteractive: false,
+        needsConfirmation: true
     },
     OPEN_SHELL: {
         label: "Open shell",
-        isInteractive: true
+        isInteractive: true,
+        needsConfirmation: false
     },
     RESTART: {
         label: "Restart",
-        isInteractive: false
+        isInteractive: false,
+        needsConfirmation: false
     },
     PAUSE: {
         label: "Pause",
-        isInteractive: false
+        isInteractive: false,
+        needsConfirmation: false
     },
     STOP: {
         label: "Stop",
-        isInteractive: false
+        isInteractive: false,
+        needsConfirmation: false
     },
     UNPAUSE: {
         label: "Unpause",
-        isInteractive: false
+        isInteractive: false,
+        needsConfirmation: false
     },
 });
 
@@ -182,7 +190,15 @@ const runInteractiveCommand = (dockerCommand, callback) => {
 var runAction = (dockerAction, containerName, callback) => {
     const dockerCommand = getDockerActionCommand(dockerAction, containerName);
 
-    dockerAction.isInteractive ?
-        runInteractiveCommand(dockerCommand, callback)
-        : runBackgroundCommand(dockerCommand, callback);
+    const action = dockerAction.isInteractive
+        ? runInteractiveCommand
+        : runBackgroundCommand;
+    const actionParams = [ dockerCommand, callback ];
+
+    dockerAction.needsConfirmation
+        ? new ConfirmationModal.ConfirmationModal(
+            `Are you sure you want to ${dockerAction.label.toLowerCase()} ${containerName} container?`,
+            action,
+            actionParams
+        ) : action(...actionParams);
 };
