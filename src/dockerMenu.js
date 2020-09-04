@@ -60,7 +60,7 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
     // Show docker menu icon only if installed and append docker containers
     _renderMenu() {
         if (Docker.isDockerInstalled()) {
-            if (Docker.isDockerRunning()) {
+            if (Docker.isDockerRunning() || Docker.isPodmanInstalled()) {
                 this._feedMenu();
             } else {
                 let errMsg = _("Docker daemon not started");
@@ -69,9 +69,9 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
             }
 
             // Add Turn On / Turn Off Switch always
-			let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('Docker status');
-			this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-			this.menu.addMenuItem(statusSwitch);
+            let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('Docker status');
+            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+            this.menu.addMenuItem(statusSwitch);
         } else {
             let errMsg = _("Docker binary not found in PATH ");
             this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
@@ -107,8 +107,7 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
 };
 
 if (!Utils.isGnomeShellVersionLegacy()) {
-    DockerMenu = GObject.registerClass(
-        { GTypeName: 'DockerMenu' },
+    DockerMenu = GObject.registerClass({ GTypeName: 'DockerMenu' },
         DockerMenu
     );
 }
