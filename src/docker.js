@@ -58,6 +58,10 @@ var DockerActions = Object.freeze({
         label: "Unpause",
         isInteractive: false
     },
+    LOGS: {
+        label: "Logs",
+        isInteractive: false
+    },
 });
 
 /**
@@ -75,8 +79,8 @@ const getDockerActionCommand = (dockerAction, containerName) => {
         case DockerActions.REMOVE:
             return "docker rm " + containerName;
         case DockerActions.OPEN_SHELL:
-            return "docker exec -it " + containerName + " /bin/bash; "
-                + "if [ $? -ne 0 ]; then docker exec -it " + containerName + " /bin/sh; fi;";
+            return "docker exec -it " + containerName + " /bin/bash; " +
+                "if [ $? -ne 0 ]; then docker exec -it " + containerName + " /bin/sh; fi;";
         case DockerActions.RESTART:
             return "docker restart " + containerName;
         case DockerActions.PAUSE:
@@ -85,6 +89,8 @@ const getDockerActionCommand = (dockerAction, containerName) => {
             return "docker stop " + containerName;
         case DockerActions.UNPAUSE:
             return "docker unpause " + containerName;
+        case DockerActions.LOGS:
+            return `gnome-terminal -- bash -c 'docker logs -f ${containerName}'`;
         default:
             throw new Error("Docker action not valid");
     }
@@ -95,6 +101,8 @@ const getDockerActionCommand = (dockerAction, containerName) => {
  * @return {Boolean} whether docker is installed or not
  */
 var isDockerInstalled = () => !!GLib.find_program_in_path('docker');
+
+var isPodmanInstalled = () => !!GLib.find_program_in_path('podman');
 
 /**
  * Check if docker daemon is running
@@ -162,10 +170,10 @@ const runBackgroundCommand = (dockerCommand, callback) => {
 const runInteractiveCommand = (dockerCommand, callback) => {
     const defaultShell = GLib.getenv("SHELL");
 
-    const terminalCommand = "gnome-terminal -- "
-        + defaultShell + " -c '"
-        + dockerCommand
-        + "if [ $? -ne 0 ]; then " + defaultShell + "; fi'";
+    const terminalCommand = "gnome-terminal -- " +
+        defaultShell + " -c '" +
+        dockerCommand +
+        "if [ $? -ne 0 ]; then " + defaultShell + "; fi'";
 
     Utils.async(
         () => GLib.spawn_command_line_async(terminalCommand),
@@ -183,6 +191,6 @@ var runAction = (dockerAction, containerName, callback) => {
     const dockerCommand = getDockerActionCommand(dockerAction, containerName);
 
     dockerAction.isInteractive ?
-        runInteractiveCommand(dockerCommand, callback)
-        : runBackgroundCommand(dockerCommand, callback);
+        runInteractiveCommand(dockerCommand, callback) :
+        runBackgroundCommand(dockerCommand, callback);
 };

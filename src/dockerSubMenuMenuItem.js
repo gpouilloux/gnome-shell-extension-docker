@@ -70,6 +70,7 @@ var DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupS
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.RESTART));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.PAUSE));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.STOP));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.LOGS));
                 break;
             case "paused":
                 this.actor.insert_child_at_index(createIcon('media-playback-pause-symbolic', 'status-paused'), 1);
@@ -83,8 +84,7 @@ var DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupS
 };
 
 if (!Utils.isGnomeShellVersionLegacy()) {
-    DockerSubMenuMenuItem = GObject.registerClass(
-        { GTypeName: 'DockerSubMenuMenuItem' },
+    DockerSubMenuMenuItem = GObject.registerClass({ GTypeName: 'DockerSubMenuMenuItem' },
         DockerSubMenuMenuItem
     );
 }
