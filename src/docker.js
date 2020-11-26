@@ -20,9 +20,6 @@
 
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Utils = Me.imports.src.utils;
 
 /**
  * Dictionary for Docker actions
@@ -30,6 +27,14 @@ const Utils = Me.imports.src.utils;
  * @type {{Object.<String, {label: String, isInteractive: Boolean}>}}
  */
 var DockerActions = Object.freeze({
+    ENABLE: {
+    	label: "Enable",
+    	isInteractibe: false
+        },
+    DISABLE: {
+        label: "Disable",
+        isInteractibe: false
+        },
     START: {
         label: "Start",
         isInteractive: false
@@ -70,6 +75,10 @@ var DockerActions = Object.freeze({
 
 const getDockerActionCommand = (dockerAction, containerName) => {
     switch (dockerAction) {
+    	case DockerActions.ENABLE:
+            return "systemctl start docker";
+        case DockerActions.DISABLE:
+            return "systemctl stop docker";            
         case DockerActions.START:
             return "docker start " + containerName;
         case DockerActions.REMOVE:
