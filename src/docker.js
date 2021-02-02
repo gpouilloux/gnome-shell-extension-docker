@@ -20,6 +20,7 @@ var dockerCommandsToLabels = {
  * @return {Boolean} whether docker is installed or not
  */
 var isDockerInstalled = () => !!GLib.find_program_in_path("docker");
+var isXTerminalEmulatorInstalled = () => !!GLib.find_program_in_path("x-terminal-emulator");
 
 /**
  * Check if Linux user is in 'docker' group (to manage Docker without 'sudo')
@@ -108,24 +109,18 @@ var getContainers = () => {
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
 var runCommand = async(command, containerName, callback) => {
-    var cmd = [""];
+    var cmd = isXTerminalEmulatorInstalled() ? [ "x-terminal-emulator", "-e", "sh", "-c" ] : ["gnome-terminal", "--", "sh", "-c"];
     switch (command) {
         case "exec":
             cmd = [
-                "x-terminal-emulator",
-                "-e",
-                "bash",
-                "-c",
+                ...cmd,                
                 "'docker exec -it " + containerName + " sh; exec $SHELL'"
             ];
             GLib.spawn_command_line_async(cmd.join(" "));
             break;
         case "logs":
             cmd = [
-                "x-terminal-emulator",
-                "-e",
-                "bash",
-                "-c",
+                ...cmd,
                 "'docker logs -f --tail 2000 " + containerName + "; exec $SHELL' "
             ];
             GLib.spawn_command_line_async(cmd.join(" "));
