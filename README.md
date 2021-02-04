@@ -43,6 +43,7 @@ The following actions are available from the GNOME Panel menu per Docker contain
 
 - [kiuma](https://github.com/RedSoftwareSystems)
 - [Tamas-Toth-ebola](https://github.com/Tamas-Toth-ebola)
+- [jacobfogg](https://github.com/jacobfogg)
 
 ## Credits
 
