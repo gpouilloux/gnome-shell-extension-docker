@@ -44,7 +44,7 @@ The following actions are available from the GNOME Panel menu per Docker contain
 - [kiuma](https://github.com/RedSoftwareSystems)
 - [Tamas-Toth-ebola](https://github.com/Tamas-Toth-ebola)
 - [jacobfogg](https://github.com/jacobfogg)
-
+- [albeto001](https://github.com/albeto001)
 ## Credits
 
 This extension is a fork of [gpouilloux's](https://github.com/gpouilloux) great original [Gnome Shell extension for Docker](https://github.com/gpouilloux/gnome-shell-extension-docker) work.

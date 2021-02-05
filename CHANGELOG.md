@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. *(The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).)*
 
+## [5] - 2021-02-05
+
+### Added
+
+- Count on running intances
+- Compatibility for podman with docker alias
+
+### Fix
+
+- Terminal issue for non ubuntu distro. Fallback to gnome-terminal
+- St.Label deallocation problem
+
 ## [4] - 2020-05-25
 
 ### Added
