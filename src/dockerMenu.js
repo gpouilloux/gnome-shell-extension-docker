@@ -95,19 +95,19 @@ var DockerMenu = GObject.registerClass(
             }
           });
         }
+      
+        this.buttonText.set_text(dockerCount + "");
+
+        if (this._timeout) {
+          Mainloop.source_remove(this._timeout);
+          this._timeout = null;
+        }
+
+        this._timeout = Mainloop.timeout_add_seconds(
+          2,
+          Lang.bind(this, this._refreshCount)
+        );
       } catch (err) {}
-
-      this.buttonText.set_text(dockerCount + "");
-
-      if (this._timeout) {
-        Mainloop.source_remove(this._timeout);
-        this._timeout = null;
-      }
-
-      this._timeout = Mainloop.timeout_add_seconds(
-        2,
-        Lang.bind(this, this._refreshCount)
-      );
     }
     // Append containers to menu
     _feedMenu() {
