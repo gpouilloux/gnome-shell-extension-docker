@@ -19,5 +19,6 @@ function enable() {
 
 // Triggered when extension is disabled
 function disable() {
+  _indicator.clearLoop();
   _indicator.destroy();
 }

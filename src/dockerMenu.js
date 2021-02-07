@@ -15,6 +15,7 @@ const Lang = imports.lang;
 // Docker icon as panel menu
 var DockerMenu = GObject.registerClass(
   class DockerMenu extends panelMenu.Button {
+
     _init(menuAlignment, nameText) {
       super._init(menuAlignment, nameText);
 
@@ -84,12 +85,16 @@ var DockerMenu = GObject.registerClass(
       this.show();
     }
 
+    clearLoop() {
+      if (this._timeout) {
+        Mainloop.source_remove(this._timeout);
+        this._timeout = null;
+      }
+    }
+
     _refreshCount() {
       try {
-        if (this._timeout) {
-          Mainloop.source_remove(this._timeout);
-          this._timeout = null;
-        }
+        this.clearLoop();
 
         const dockerCount = Docker.getContainers().reduce((acc, container) => container.status.indexOf("Up") > -1 ? acc + 1 : acc, 0);
         
