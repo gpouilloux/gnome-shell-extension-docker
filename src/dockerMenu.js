@@ -65,49 +65,44 @@ var DockerMenu = GObject.registerClass(
               "Please start your Docker service first!\n(Seems Docker daemon not started yet.)"
             );
             this.menu.addMenuItem(new PopupMenuItem(errMsg));
-            log(errMsg);
+            logError(errMsg);
           }
         } else {
           let errMsg = _(
             "Please put your Linux user into `docker` group first!\n(Seems not in that yet.)"
           );
           this.menu.addMenuItem(new PopupMenuItem(errMsg));
-          log(errMsg);
+          logError(errMsg);
         }
       } else {
         let errMsg = _(
           "Please properly install Docker service first!\n(Seems Docker binary not found in PATH yet.)"
         );
         this.menu.addMenuItem(new PopupMenuItem(errMsg));
-        log(errMsg);
+        logError(errMsg);
       }
       this.show();
     }
 
     _refreshCount() {
-      let dockerCount = 0;
       try {
-        let containers = Docker.getContainers();
-        if (containers.length > 0) {
-          containers.forEach((container) => {
-            if (container.status.indexOf("Up") > -1) {
-              dockerCount++;
-            }
-          });
-        }
-      
-        this.buttonText.set_text(dockerCount + "");
-
         if (this._timeout) {
           Mainloop.source_remove(this._timeout);
           this._timeout = null;
         }
 
+        const dockerCount = Docker.getContainers().reduce((acc, container) => container.status.indexOf("Up") > -1 ? acc + 1 : acc, 0);
+        
+        if (this.buttonText) {
+          this.buttonText.set_text(dockerCount.toString(10));
+        }
         this._timeout = Mainloop.timeout_add_seconds(
           2,
           Lang.bind(this, this._refreshCount)
         );
-      } catch (err) {}
+      } catch (err) {
+        logError(err);
+      }
     }
     // Append containers to menu
     _feedMenu() {
@@ -128,8 +123,8 @@ var DockerMenu = GObject.registerClass(
       } catch (err) {
         const errMsg = "Error occurred when fetching containers";
         this.menu.addMenuItem(new PopupMenuItem(errMsg));
-        log(errMsg);
-        log(err);
+        logError(errMsg);
+        logError(err);
       }
     }
   }
