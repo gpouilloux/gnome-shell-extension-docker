@@ -15,7 +15,7 @@ const Lang = imports.lang;
 // Docker icon as panel menu
 var DockerMenu = GObject.registerClass(
   class DockerMenu extends panelMenu.Button {
-
+    _containers = [];
     _init(menuAlignment, nameText) {
       super._init(menuAlignment, nameText);
 
@@ -30,9 +30,9 @@ var DockerMenu = GObject.registerClass(
         style_class: "system-status-icon",
         icon_size: "16",
       });
-
+      const loading = _("Loading...");
       this.buttonText = new St.Label({
-        text: _("Loading..."),
+        text: loading,
         style: "margin-top:4px;",
       });
 
@@ -41,50 +41,61 @@ var DockerMenu = GObject.registerClass(
       hbox.add_child(this.buttonText);
       this.add_child(hbox);
       this.connect("button_press_event", this._refreshMenu.bind(this));
+      this.menu.addMenuItem(new PopupMenuItem(loading));
 
-      this._renderMenu();
       this._refreshCount();
+      if (Docker.hasPodman || Docker.hasDocker) {
+        this.show();
+      }
     }
 
     // Refresh  the menu everytime the user click on it
     // It allows to have up-to-date information on docker containers
-    _refreshMenu() {
-      if (this.menu.isOpen) {
+    _refreshMenu() {      
+      if (this.menu.isOpen) {        
         this.menu.removeAll();
-        this._renderMenu();
-      }
+        this._feedMenu().catch( (e) => this.menu.addMenuItem(new PopupMenuItem(e.message)));
+      }     
     }
 
-    // Show docker menu icon only if installed, append docker containers, and manageable with current user without 'sudo'
-    _renderMenu() {
-      if (Docker.isDockerInstalled() || Docker.isPodmanInstalled()) {
-        if (Docker.isUserInDockerGroup() || Docker.isPodmanInstalled()) {
-          if (Docker.isDockerRunning() || Docker.isPodmanInstalled()) {
-            this._feedMenu();
-          } else {
-            let errMsg = _(
-              "Please start your Docker service first!\n(Seems Docker daemon not started yet.)"
-            );
-            this.menu.addMenuItem(new PopupMenuItem(errMsg));
-            logError(errMsg);
-          }
-        } else {
-          let errMsg = _(
-            "Please put your Linux user into `docker` group first!\n(Seems not in that yet.)"
-          );
-          this.menu.addMenuItem(new PopupMenuItem(errMsg));
-          logError(errMsg);
-        }
-      } else {
+    _checkServices() {
+      if (!Docker.hasPodman && !Docker.hasDocker) {
         let errMsg = _(
-          "Please properly install Docker service first!\n(Seems Docker binary not found in PATH yet.)"
+          "Please install Docker or Podman to use this plugin"
         );
         this.menu.addMenuItem(new PopupMenuItem(errMsg));
-        logError(errMsg);
+        throw new Error(errMsg);
       }
-      this.show();
     }
 
+    async _checkDockerRunning() {
+      if (!Docker.hasPodman && !(await Docker.isDockerRunning())) {
+        let errMsg = _(
+          "Please start your Docker service first!\n(Seems Docker daemon not started yet.)"
+        );
+        throw new Error(errMsg);
+      }
+    }
+
+    async _checkUserInDockerGroup() {
+      if (!Docker.hasPodman && !(await Docker.isUserInDockerGroup)) {
+        let errMsg = _(
+          "Please put your Linux user into `docker` group first!\n(Seems not in that yet.)"
+        );
+        throw new Error(errMsg);
+      }
+    }
+
+    async _check() {
+      return Promise.all(
+        [
+          this._checkServices(),
+          this._checkDockerRunning(),
+          //this._checkUserInDockerGroup()
+        ]
+      );
+    }
+    
     clearLoop() {
       if (this._timeout) {
         Mainloop.source_remove(this._timeout);
@@ -92,11 +103,12 @@ var DockerMenu = GObject.registerClass(
       }
     }
 
-    _refreshCount() {
+    async _refreshCount() {
       try {
         this.clearLoop();
-
-        const dockerCount = Docker.getContainers().reduce((acc, container) => container.status.indexOf("Up") > -1 ? acc + 1 : acc, 0);
+        this.containers = await Docker.getContainers();
+        
+        const dockerCount = this.containers.reduce((acc, container) => container.status.indexOf("Up") > -1 ? acc + 1 : acc, 0);
         
         if (this.buttonText) {
           this.buttonText.set_text(dockerCount.toString(10));
@@ -110,27 +122,20 @@ var DockerMenu = GObject.registerClass(
       }
     }
     // Append containers to menu
-    _feedMenu() {
-      try {
-        const containers = Docker.getContainers();
-        if (containers.length > 0) {
-          containers.forEach((container) => {
-            const subMenu = new DockerSubMenu(
-              container.project,
-              container.name,
-              container.status
-            );
-            this.menu.addMenuItem(subMenu);
-          });
-        } else {
-          this.menu.addMenuItem(new PopupMenuItem("No containers detected"));
-        }
-      } catch (err) {
-        const errMsg = "Error occurred when fetching containers";
-        this.menu.addMenuItem(new PopupMenuItem(errMsg));
-        logError(errMsg);
-        logError(err);
-      }
+    async _feedMenu() {      
+      await this._check();      
+      if (this.containers.length > 0) {
+        this.containers.forEach((container) => {
+          const subMenu = new DockerSubMenu(
+            container.project,
+            container.name,
+            container.status
+          );
+          this.menu.addMenuItem(subMenu);
+        });
+      } else {
+        this.menu.addMenuItem(new PopupMenuItem("No containers detected"));
+      }    
     }
   }
 );

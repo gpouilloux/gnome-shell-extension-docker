@@ -15,19 +15,15 @@ var dockerCommandsToLabels = {
   logs: "Logs",
 };
 
-/**
- * Check if docker is installed
- * @return {Boolean} whether docker is installed or not
- */
-var isDockerInstalled = () => !!GLib.find_program_in_path("docker");
-var isXTerminalEmulatorInstalled = () =>
-  !!GLib.find_program_in_path("x-terminal-emulator");
+var hasDocker = !!GLib.find_program_in_path("docker");
+var hasPodman = !!GLib.find_program_in_path("podman");
+var hasXTerminalEmulator = !!GLib.find_program_in_path("x-terminal-emulator");
 
 /**
  * Check if Linux user is in 'docker' group (to manage Docker without 'sudo')
  * @return {Boolean} whether current Linux user is in 'docker' group or not
  */
-var isUserInDockerGroup = () => {
+var isUserInDockerGroup = (() => {
   const _userName = GLib.get_user_name();
   let _userGroups = ByteArray.toString(
     GLib.spawn_command_line_sync("groups " + _userName)[1]
@@ -36,79 +32,46 @@ var isUserInDockerGroup = () => {
   if (_userGroups.match(/\sdocker[\s\n]/g)) _inDockerGroup = true; // Regex search for ' docker ' or ' docker' in Linux user's groups
 
   return _inDockerGroup;
-};
-
-var isPodmanInstalled = () => {
-  return !!GLib.find_program_in_path("podman") && !isDockerRunning();
-};
+})();
 
 /**
  * Check if docker daemon is running
  * @return {Boolean} whether docker daemon is running or not
  */
-var isDockerRunning = () => {
-  const [res, pid, in_fd, out_fd, err_fd] = GLib.spawn_async_with_pipes(
-    null,
-    ["/bin/ps", "cax"],
-    null,
-    0,
-    null
-  );
-
-  const outReader = new Gio.DataInputStream({
-    base_stream: new Gio.UnixInputStream({ fd: out_fd }),
-  });
-
-  let dockerRunning = false;
-  let hasLine = true;
-  do {
-    const [out, size] = outReader.read_line(null);
-    if (out && ByteArray.toString(out).indexOf("docker") > -1) {
-      dockerRunning = true;
-    } else if (size <= 0) {
-      hasLine = false;
-    }
-  } while (!dockerRunning && hasLine);
-
-  return dockerRunning;
+var isDockerRunning = async () => {
+  const cmdResult = await execCommand(["/bin/ps", "cax"]);  
+  return cmdResult.search(/dockerd/) >= 0;
 };
 
 /**
  * Get an array of containers
  * @return {Array} The array of containers as { project, name, status }
  */
-var getContainers = () => {
-  const [res, out, err, status] = GLib.spawn_command_line_sync(
-    "docker ps -a --format '{{.Names}},{{.Status}}'"
-  );
-  if (status !== 0) throw new Error("Error occurred when fetching containers");
+var getContainers = async () => {
+  const psOut = await execCommand(["docker", "ps", "-a", "--format", "{{.Names}},{{.Status}}"]);
+  
+  const images = psOut.split('\n').filter((line) => line.trim().length).map((line) => {
+    const [name, status] = line.split(',');
+    return {
+      name,
+      status,
+    }
+  });
 
-  return String.fromCharCode
-    .apply(String, out)
-    .trim()
-    .split("\n")
-    .filter((string) => string.length > 0)
-    .map((string) => {
-      const values = string.split(",");
-
-      // Get 'docker-compose' project name for the container
-      let projectName = ByteArray.toString(
-        GLib.spawn_command_line_sync(
-          "docker inspect -f '{{index .Config.Labels \"com.docker.compose.project\"}}' " +
-            values[0]
-        )[1]
-      );
-      projectName = projectName.replace("\n", "");
-      projectName = projectName.toUpperCase();
-      projectName = projectName;
-      if (projectName != "") projectName = projectName + " ∘ ";
-
-      return {
-        project: projectName,
-        name: values[0],
-        status: values[1],
-      };
-    });
+  return Promise.all(images.map(({name, status}) => {
+    return new Promise((resolve, reject) => {      
+      execCommand(["docker", "inspect", "-f", "{{index .Config.Labels \"com.docker.compose.project\"}}", name]).then(
+        (composePrj) => {
+          resolve({
+            project: composePrj.split('\n')[0].trim(),
+            name, 
+            status
+          });
+        }
+      ).catch( (e) => reject(e));        
+    })
+  }));
+  
 };
 
 /**
@@ -118,7 +81,7 @@ var getContainers = () => {
  * @param {Function} callback A callback that takes the status, command, and stdErr
  */
 var runCommand = async (command, containerName, callback) => {
-  var cmd = isXTerminalEmulatorInstalled()
+  var cmd = hasXTerminalEmulator
     ? ["x-terminal-emulator", "-e", "sh", "-c"]
     : ["gnome-terminal", "--", "sh", "-c"];
   switch (command) {
@@ -160,7 +123,7 @@ async function execCommand(
     // also be used and awaited in a Promise.
     proc.init(null);
 
-    let stdout = await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // communicate_utf8() returns a string, communicate() returns a
       // a GLib.Bytes and there are "headless" functions available as well
       proc.communicate_utf8_async(null, cancellable, (proc, res) => {
@@ -169,15 +132,14 @@ async function execCommand(
         try {
           [ok, stdout, stderr] = proc.communicate_utf8_finish(res);
           callback && callback(ok, argv.join(" "), ok ? stdout : stderr);
-          resolve(stdout);
+          ok ? resolve(stdout) : reject(sterr);
         } catch (e) {
           reject(e);
         }
       });
     });
-
-    return stdout;
   } catch (e) {
     logError(e);
+    throw e;
   }
 }

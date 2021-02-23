@@ -47,7 +47,7 @@ const getStatus = (statusMessage) => {
 var DockerSubMenu = GObject.registerClass(
   class DockerSubMenu extends PopupSubMenuMenuItem {
     _init(projectName, containerName, containerStatusMessage) {
-      super._init(projectName + containerName);
+      super._init(`${projectName}${projectName?' ∘ ': ''}${containerName}`);
 
       switch (getStatus(containerStatusMessage)) {
         case "stopped":
