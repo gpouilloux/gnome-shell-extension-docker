@@ -26,6 +26,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
 const DockerSubMenuMenuItem = Me.imports.src.dockerSubMenuMenuItem;
+const DockerMenuStatusItem = Me.imports.src.dockerMenuStatusItem;
 const Utils = Me.imports.src.utils;
 
 // Docker icon on status menu
@@ -67,6 +68,11 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
                 this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
                 log(errMsg);
             }
+
+            // Add Turn On / Turn Off Switch always
+			let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('Docker status');
+			this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+			this.menu.addMenuItem(statusSwitch);
         } else {
             let errMsg = _("Docker binary not found in PATH ");
             this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
