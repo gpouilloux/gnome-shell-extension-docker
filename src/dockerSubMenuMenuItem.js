@@ -18,8 +18,7 @@
 
 'use strict';
 
-const St = imports.gi.St;
-const GObject = imports.gi.GObject;
+const { Clutter, GObject, St } = imports.gi;
 const Lang = imports.lang;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -57,26 +56,28 @@ var DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupS
 
     _init(containerName, containerStatusMessage) {
         super._init(containerName);
+        
+        this.clutterActor = this instanceof Clutter.Actor ? this : this.actor;
 
         switch (getStatus(containerStatusMessage)) {
             case "stopped":
-                this.actor.insert_child_at_index(createIcon('process-stop-symbolic', 'status-stopped'), 1);
+                this.clutterActor.insert_child_at_index(createIcon('process-stop-symbolic', 'status-stopped'), 1);
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.START));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.REMOVE));
                 break;
             case "running":
-                this.actor.insert_child_at_index(createIcon('system-run-symbolic', 'status-running'), 1);
+                this.clutterActor.insert_child_at_index(createIcon('system-run-symbolic', 'status-running'), 1);
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.OPEN_SHELL));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.RESTART));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.PAUSE));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.STOP));
                 break;
             case "paused":
-                this.actor.insert_child_at_index(createIcon('media-playback-pause-symbolic', 'status-paused'), 1);
+                this.clutterActor.insert_child_at_index(createIcon('media-playback-pause-symbolic', 'status-paused'), 1);
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.UNPAUSE));
                 break;
             default:
-                this.actor.insert_child_at_index(createIcon('action-unavailable-symbolic', 'status-undefined'), 1);
+                this.clutterActor.insert_child_at_index(createIcon('action-unavailable-symbolic', 'status-undefined'), 1);
                 break;
         }
     }

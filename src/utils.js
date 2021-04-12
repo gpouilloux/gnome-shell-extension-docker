@@ -1,6 +1,6 @@
 /*
  * Gnome3 Docker Menu Extension
- * Copyright (C) 2017 Guillaume Pouilloux <gui.pouilloux@gmail.com>
+ * Copyright (C) 2020 Guillaume Pouilloux <gui.pouilloux@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 'use strict';
 
+const ByteArray = imports.byteArray;
 const GLib = imports.gi.GLib;
 const Config = imports.misc.config;
 
@@ -35,3 +36,20 @@ var isGnomeShellVersionLegacy = () => {
  * @param {Function} callback The callback to call after fn
  */
 var async = (fn, callback) => GLib.timeout_add(GLib.PRIORITY_DEFAULT, 0, () => callback(fn()));
+
+/**
+ * Return a string representation of the given byteArray
+ * 
+ * This is necessary for compatibility with older Gnome Shell versions,
+ * where GJS introspected methods handed back instances of the custom ByteArray
+ * type. Newer versions replace this behaviour by having methods return
+ * instances of JS Uint8Array type, whose "toString" method has a different
+ * purpose, hence an explicit call to ByteArray toString method is required.
+ * @param {Uint8Array|ByteArray} byteArray
+ * @return {String} The string representation of byteArray
+ */
+var getByteArrayString = (byteArray) => {
+    return byteArray instanceof Uint8Array ?
+        ByteArray.toString(byteArray)
+        : byteArray.toString();
+};
