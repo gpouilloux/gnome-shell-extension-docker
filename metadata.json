@@ -4,5 +4,5 @@
   "description": "A GNOME Shell extension (GNOME Panel applet) to be able to generally control your available Docker containers.",
   "url": "https://github.com/RedSoftwareSystems/easy_docker_containers",
   "version": 7,
-  "shell-version": ["3.34", "3.36", "3.38", "40.0"]
+  "shell-version": ["3.34", "3.36", "3.38", "40"]
 }
