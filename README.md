@@ -12,6 +12,7 @@ The following actions are available :
 - Stop
 - Restart
 - Exec shell
+- Set a custom shell command
 
 ## Screenshot
 
