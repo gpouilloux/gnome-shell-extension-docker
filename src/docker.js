@@ -24,6 +24,8 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.src.utils;
 
+var customShellCommandsToContainers = {};
+
 /**
  * Dictionary for Docker actions
  * @readonly
@@ -75,8 +77,12 @@ const getDockerActionCommand = (dockerAction, containerName) => {
         case DockerActions.REMOVE:
             return "docker rm " + containerName;
         case DockerActions.OPEN_SHELL:
-            return "docker exec -it " + containerName + " /bin/bash; "
-                + "if [ $? -ne 0 ]; then docker exec -it " + containerName + " /bin/sh; fi;";
+            let customCommand = customShellCommandsToContainers[containerName];
+            customCommand = customCommand.split('"').join('\\\\\\"');
+            customCommand = customCommand ? ` -c "${customCommand}"` : ''
+
+            return "docker exec -it " + containerName + " /bin/bash" + customCommand + "; "
+                + "if [ $? -ne 0 ]; then docker exec -it " + containerName + " /bin/sh" + customCommand + "; fi;";
         case DockerActions.RESTART:
             return "docker restart " + containerName;
         case DockerActions.PAUSE:

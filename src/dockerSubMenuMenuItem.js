@@ -27,6 +27,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const DockerActions = Me.imports.src.docker.DockerActions;
 const DockerMenuItem = Me.imports.src.dockerMenuItem;
 const Utils = Me.imports.src.utils;
+const Docker = Me.imports.src.docker;
 
 /**
  * Create a St.Icon
@@ -58,6 +59,10 @@ var DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupS
     _init(containerName, containerStatusMessage) {
         super._init(containerName);
 
+        Utils.getCustomShellCommandsToContainersFromStorage((res) => {
+            Docker.customShellCommandsToContainers = res;
+        });
+
         switch (getStatus(containerStatusMessage)) {
             case "stopped":
                 this.actor.insert_child_at_index(createIcon('process-stop-symbolic', 'status-stopped'), 1);
@@ -70,6 +75,25 @@ var DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupS
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.RESTART));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.PAUSE));
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.STOP));
+
+                const customShellCommandButton = new PopupMenu.PopupMenuItem('Set custom shell command');
+
+                this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                this.menu.addMenuItem(customShellCommandButton);
+
+                customShellCommandButton.connect('activate', () => {
+                    const textEntryProps = {
+                        title: 'Set a custom shell command',
+                        text: `Insert here a command to be executed when opening the \\"${containerName}\\" shell.`,
+                        entryText: Docker.customShellCommandsToContainers[containerName],
+                    };
+
+                    Utils.openWindowTextEntry(textEntryProps, (customCommand) => {
+                        Docker.customShellCommandsToContainers[containerName] = customCommand;
+                        Utils.saveCustomShellCommandsToContainers(Docker.customShellCommandsToContainers);
+                    });
+                });
+                
                 break;
             case "paused":
                 this.actor.insert_child_at_index(createIcon('media-playback-pause-symbolic', 'status-paused'), 1);
