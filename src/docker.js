@@ -39,7 +39,7 @@ var isUserInDockerGroup = (() => {
  * @return {Boolean} whether docker daemon is running or not
  */
 var isDockerRunning = async () => {
-  const cmdResult = await execCommand(["/bin/ps", "cax"]);  
+  const cmdResult = await execCommand(["ps", "cax"]);
   return cmdResult.search(/dockerd/) >= 0;
 };
 
