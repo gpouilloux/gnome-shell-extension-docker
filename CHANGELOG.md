@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file. *(The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).)*
 
-## [8] - 2021-04-27
+## [11] - 2021-10-08
+### Fix
+- Remove deprecated Lang
+## [10] - 2021-10-08
+### Fix
+- Fix ps binary path
+- _containers attribute fix for DockerMenu
+
+## [9] - 2021-04-27
 ### Fix
 
 - Enabling all gnome-shell version 40

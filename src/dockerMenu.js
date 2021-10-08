@@ -10,7 +10,6 @@ const Docker = Me.imports.src.docker;
 const { DockerSubMenu } = Me.imports.src.dockerSubMenuMenuItem;
 const GObject = imports.gi.GObject;
 const Mainloop = imports.mainloop;
-const Lang = imports.lang;
 
 // Docker icon as panel menu
 var DockerMenu = GObject.registerClass(
@@ -18,7 +17,7 @@ var DockerMenu = GObject.registerClass(
     _containers = [];
     _init(menuAlignment, nameText) {
       super._init(menuAlignment, nameText);
-
+      this._refreshCount = this._refreshCount.bind(this);
       // Custom Docker icon as menu button
       const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
       const gicon = Gio.icon_new_for_string(
@@ -115,7 +114,7 @@ var DockerMenu = GObject.registerClass(
         }
         this._timeout = Mainloop.timeout_add_seconds(
           2,
-          Lang.bind(this, this._refreshCount)
+          this._refreshCount
         );
       } catch (err) {
         logError(err);
