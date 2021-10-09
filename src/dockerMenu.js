@@ -85,6 +85,7 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
         try {
             const containers = Docker.getContainers();
             if (containers.length > 0) {
+                containers.sort(this._compareContainerNames);
                 containers.forEach(container => {
                     const subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(
                         container.name,
@@ -103,6 +104,18 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
             log(errMsg);
             log(err);
         }
+    }
+
+    _compareContainerNames( a, b ) {
+        if ( a.name < b.name ) {
+            return -1;
+        }
+
+        if ( a.name > b.name ) {
+            return 1;
+        }
+
+        return 0;
     }
 };
 
