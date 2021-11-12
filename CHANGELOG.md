@@ -1,7 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file. *(The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).)*
-
+## [13] - 2021-10-08
+Scheduled docker status updater optimization
+## [12] - 2021-10-08
+Gnome version update
 ## [11] - 2021-10-08
 ### Fix
 - Remove deprecated Lang

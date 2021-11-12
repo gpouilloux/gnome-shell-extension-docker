@@ -11,13 +11,17 @@ const { DockerSubMenu } = Me.imports.src.dockerSubMenuMenuItem;
 const GObject = imports.gi.GObject;
 const Mainloop = imports.mainloop;
 
+const isContainerUp = (container) => container.status.indexOf("Up") > -1;
+
 // Docker icon as panel menu
 var DockerMenu = GObject.registerClass(
   class DockerMenu extends panelMenu.Button {
-    _containers = [];
+    _containers = null;
     _init(menuAlignment, nameText) {
       super._init(menuAlignment, nameText);
       this._refreshCount = this._refreshCount.bind(this);
+      this._refreshMenu = this._refreshMenu.bind(this);
+      this._feedMenu = this._feedMenu.bind(this);
       // Custom Docker icon as menu button
       const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
       const gicon = Gio.icon_new_for_string(
@@ -39,7 +43,7 @@ var DockerMenu = GObject.registerClass(
       hbox.add_child(arrowIcon(St.Side.BOTTOM));
       hbox.add_child(this.buttonText);
       this.add_child(hbox);
-      this.connect("button_press_event", this._refreshMenu.bind(this));
+      //this.connect("button_press_event", this._refreshMenu.bind(this));
       this.menu.addMenuItem(new PopupMenuItem(loading));
 
       this._refreshCount();
@@ -52,7 +56,7 @@ var DockerMenu = GObject.registerClass(
     // It allows to have up-to-date information on docker containers
     _refreshMenu() {      
       if (this.menu.isOpen) {        
-        this.menu.removeAll();
+        
         this._feedMenu().catch( (e) => this.menu.addMenuItem(new PopupMenuItem(e.message)));
       }     
     }
@@ -104,14 +108,20 @@ var DockerMenu = GObject.registerClass(
 
     async _refreshCount() {
       try {
+        
         this.clearLoop();
-        this.containers = await Docker.getContainers();
         
-        const dockerCount = this.containers.reduce((acc, container) => container.status.indexOf("Up") > -1 ? acc + 1 : acc, 0);
+        const dockerContainers = await Docker.getContainers();        
+
+        const dockerCount = dockerContainers.filter((container) => isContainerUp(container)).length;    
         
-        if (this.buttonText) {
-          this.buttonText.set_text(dockerCount.toString(10));
+        const count = dockerCount.toString(10);
+      
+        if (this.buttonText.get_text() !== count) {
+          this.buttonText.set_text(count);
         }
+        
+        await this._feedMenu(dockerContainers || []);
         this._timeout = Mainloop.timeout_add_seconds(
           2,
           this._refreshCount
@@ -120,21 +130,36 @@ var DockerMenu = GObject.registerClass(
         logError(err);
       }
     }
+    
     // Append containers to menu
-    async _feedMenu() {      
-      await this._check();      
-      if (this.containers.length > 0) {
-        this.containers.forEach((container) => {
-          const subMenu = new DockerSubMenu(
-            container.project,
-            container.name,
-            container.status
-          );
-          this.menu.addMenuItem(subMenu);
-        });
-      } else {
-        this.menu.addMenuItem(new PopupMenuItem("No containers detected"));
-      }    
+    async _feedMenu(dockerContainers) {      
+      await this._check();  
+      if (
+        !this._containers ||
+        dockerContainers.length !== this._containers.length ||
+        dockerContainers.some( (currContainer, i) => {
+          const container = this._containers[i];
+          
+          return currContainer.project !== container.project ||
+          currContainer.name !== container.name ||
+          isContainerUp(currContainer) !== isContainerUp(container)
+        })
+        ) {
+          this.menu.removeAll(); 
+          this._containers = dockerContainers;
+          this._containers.forEach((container) => {
+            const subMenu = new DockerSubMenu(
+              container.project,
+              container.name,
+              container.status
+            );
+            this.menu.addMenuItem(subMenu);
+          });
+          if (!this._containers.length) {
+            this.menu.addMenuItem(new PopupMenuItem("No containers detected"));
+          }  
+      }   
+        
     }
   }
 );
