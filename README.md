@@ -10,7 +10,6 @@ The following actions are available :
 - Remove
 - Pause
 - Stop
-- Stop and remove
 - Restart
 - Exec shell
 
