@@ -42,10 +42,6 @@ var DockerActions = Object.freeze({
         label: "Open shell",
         isInteractive: true
     },
-    STOP_AND_REMOVE: {
-        label: "Stop and remove",
-        isInteractive: false,
-    },
     RESTART: {
         label: "Restart",
         isInteractive: false
@@ -77,7 +73,7 @@ const getDockerActionCommand = (dockerAction, containerName) => {
         case DockerActions.START:
             return "docker start " + containerName;
         case DockerActions.REMOVE:
-            return "docker rm " + containerName + " --force";
+            return "docker rm --force " + containerName;
         case DockerActions.OPEN_SHELL:
             return "docker exec -it " + containerName + " /bin/bash; "
                 + "if [ $? -ne 0 ]; then docker exec -it " + containerName + " /bin/sh; fi;";
@@ -89,8 +85,6 @@ const getDockerActionCommand = (dockerAction, containerName) => {
             return "docker stop " + containerName;
         case DockerActions.UNPAUSE:
             return "docker unpause " + containerName;
-        case DockerActions.STOP_AND_REMOVE:
-              return "docker rm --force  " + containerName;
         default:
             throw new Error("Docker action not valid");
     }
