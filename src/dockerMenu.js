@@ -44,7 +44,7 @@ var DockerMenu = GObject.registerClass(
       hbox.add_child(arrowIcon(St.Side.BOTTOM));
       hbox.add_child(this.buttonText);
       this.add_child(hbox);
-      //this.connect("button_press_event", this._refreshMenu.bind(this));
+      this.menu.connect("open-state-changed", this._refreshMenu.bind(this));
       this.menu.addMenuItem(new PopupMenuItem(loading));
 
       this._refreshCount();
@@ -53,12 +53,12 @@ var DockerMenu = GObject.registerClass(
       }
     }
 
-    // Refresh  the menu everytime the user click on it
+    // Refresh  the menu everytime the user opens it
     // It allows to have up-to-date information on docker containers
-    _refreshMenu() {      
+    async _refreshMenu() {      
       if (this.menu.isOpen) {        
-        
-        this._feedMenu().catch( (e) => this.menu.addMenuItem(new PopupMenuItem(e.message)));
+        const containers = await Docker.getContainers();
+        this._feedMenu(containers).catch( (e) => this.menu.addMenuItem(new PopupMenuItem(e.message)));
       }     
     }
 
@@ -119,17 +119,13 @@ var DockerMenu = GObject.registerClass(
         
         this.clearLoop();
 
-        const dockerContainers = await Docker.getContainers();       
-
-        const dockerCount = dockerContainers.filter((container) => isContainerUp(container)).length;    
-        
+        const dockerCount = await Docker.getContainerCount();  
         const count = dockerCount.toString(10);
       
         if (this.buttonText.get_text() !== count) {
           this.buttonText.set_text(count);
         }
         
-        await this._feedMenu(dockerContainers || []);
         this._timeout = GLib.timeout_add_seconds(
           GLib.PRIORITY_DEFAULT_IDLE,
           2,

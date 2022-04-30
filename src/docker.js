@@ -47,7 +47,7 @@ var isDockerRunning = async () => {
  * Get an array of containers
  * @return {Array} The array of containers as { project, name, status }
  */
-var getContainers = async () => {
+ var getContainers = async () => {
   const psOut = await execCommand(["docker", "ps", "-a", "--format", "{{.Names}},{{.Status}}"]);
   
   const images = psOut.split('\n').filter((line) => line.trim().length).map((line) => {
@@ -58,19 +58,35 @@ var getContainers = async () => {
     }
   });
 
-  return Promise.all(images.map(({name, status}) => {
-    return new Promise((resolve, reject) => {      
-      execCommand(["docker", "inspect", "-f", "{{index .Config.Labels \"com.docker.compose.project\"}}", name]).then(
-        (composePrj) => {
-          resolve({
-            project: composePrj.split('\n')[0].trim(),
-            name, 
-            status
-          });
-        }
-      ).catch( (e) => reject(e));        
-    })
+  return Promise.all(images.map(async ({name, status}) => {
+    try {
+      const composePrj = await execCommand(["docker", "inspect", "-f", "{{index .Config.Labels \"com.docker.compose.project\"}}", name]);
+      return {
+        project: composePrj.split('\n')[0].trim(),
+        name,
+        status
+      };
+    } catch (e) {
+      return logError(e);
+    }
   }));
+};
+
+/**
+ * Get the number of containers
+ * @return {Number} The number of running containers
+ */
+var getContainerCount = async () => {
+  const psOut = await execCommand(["docker", "ps", "--format", "{{.Names}},{{.Status}}"]);
+  
+  const images = psOut.split('\n').filter((line) => line.trim().length).map((line) => {
+    const [name, status] = line.split(',');
+    return {
+      name,
+      status,
+    }
+  });
+  return images.length;
   
 };
 
@@ -141,7 +157,6 @@ async function execCommand(
                 message: stderr ? stderr.trim() : GLib.strerror(status)
             });
           }
-
           resolve(stdout);
         } catch (e) {
           reject(e);
