@@ -23,6 +23,13 @@ var DockerMenu = GObject.registerClass(
       this._refreshMenu = this._refreshMenu.bind(this);
       this._feedMenu = this._feedMenu.bind(this);
       this._timeout = null;
+
+      this.settings = extensionUtils.getSettings(
+        'red.software.systems.easy_docker_containers'
+      );
+
+      this._refreshDelay = this.settings.get_int('refresh-delay');
+
       // Custom Docker icon as menu button
       const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
       const gicon = Gio.icon_new_for_string(
@@ -128,7 +135,7 @@ var DockerMenu = GObject.registerClass(
         
         this._timeout = GLib.timeout_add_seconds(
           GLib.PRIORITY_DEFAULT_IDLE,
-          2,
+          this._refreshDelay,
           this._refreshCount
         );
       } catch (err) {
