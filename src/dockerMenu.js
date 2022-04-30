@@ -9,7 +9,7 @@ const Me = extensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
 const { DockerSubMenu } = Me.imports.src.dockerSubMenuMenuItem;
 const GObject = imports.gi.GObject;
-const Mainloop = imports.mainloop;
+const { GLib } = imports.gi;
 
 const isContainerUp = (container) => container.status.indexOf("Up") > -1;
 
@@ -101,7 +101,7 @@ var DockerMenu = GObject.registerClass(
     
     clearLoop() {
       if (this._timeout) {
-        Mainloop.source_remove(this._timeout);
+        GLib.source_remove(this._timeout);
         this._timeout = null;
       }
     }
@@ -111,7 +111,7 @@ var DockerMenu = GObject.registerClass(
         
         this.clearLoop();
         
-        const dockerContainers = await Docker.getContainers();        
+        const dockerContainers = await Docker.getContainers();       
 
         const dockerCount = dockerContainers.filter((container) => isContainerUp(container)).length;    
         
@@ -122,12 +122,14 @@ var DockerMenu = GObject.registerClass(
         }
         
         await this._feedMenu(dockerContainers || []);
-        this._timeout = Mainloop.timeout_add_seconds(
+        this._timeout = GLib.timeout_add_seconds(
+          GLib.PRIORITY_DEFAULT_IDLE,
           2,
           this._refreshCount
         );
       } catch (err) {
         logError(err);
+        this.clearLoop();
       }
     }
     

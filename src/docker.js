@@ -107,13 +107,15 @@ async function execCommand(
   callback /*(status, command, err) */,
   cancellable = null
 ) {
+  let execProm = null;
+  const loop = GLib.MainLoop.new(null, false);
   try {
     // There is also a reusable Gio.SubprocessLauncher class available
     let proc = new Gio.Subprocess({
       argv: argv,
       // There are also other types of flags for merging stdout/stderr,
       // redirecting to /dev/null or inheriting the parent's pipes
-      flags: Gio.SubprocessFlags.STDOUT_PIPE,
+      flags: Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE,
     });
 
     // Classes that implement GInitable must be initialized before use, but
@@ -122,8 +124,7 @@ async function execCommand(
     // If the class implements GAsyncInitable then Class.new_async() could
     // also be used and awaited in a Promise.
     proc.init(null);
-
-    return new Promise((resolve, reject) => {
+    execProm = new Promise((resolve, reject) => {
       // communicate_utf8() returns a string, communicate() returns a
       // a GLib.Bytes and there are "headless" functions available as well
       proc.communicate_utf8_async(null, cancellable, (proc, res) => {
@@ -132,14 +133,27 @@ async function execCommand(
         try {
           [ok, stdout, stderr] = proc.communicate_utf8_finish(res);
           callback && callback(ok, argv.join(" "), ok ? stdout : stderr);
-          ok ? resolve(stdout) : reject(sterr);
+
+          if (!ok) {
+            const status = proc.get_exit_status();
+            throw new Gio.IOErrorEnum({
+                code: Gio.io_error_from_errno(status),
+                message: stderr ? stderr.trim() : GLib.strerror(status)
+            });
+          }
+
+          resolve(stdout);
         } catch (e) {
           reject(e);
-        }
+        } finally {
+          loop.quit();
+      }
       });
     });
   } catch (e) {
     logError(e);
     throw e;
   }
+  loop.run();
+  return execProm;
 }
