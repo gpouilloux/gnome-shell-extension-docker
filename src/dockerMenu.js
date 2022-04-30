@@ -22,6 +22,7 @@ var DockerMenu = GObject.registerClass(
       this._refreshCount = this._refreshCount.bind(this);
       this._refreshMenu = this._refreshMenu.bind(this);
       this._feedMenu = this._feedMenu.bind(this);
+      this._timeout = null;
       // Custom Docker icon as menu button
       const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
       const gicon = Gio.icon_new_for_string(
@@ -107,10 +108,17 @@ var DockerMenu = GObject.registerClass(
     }
 
     async _refreshCount() {
-      try {
+      try {       
+        // If the extension is not enabled but we have already set a timeout, it means this function
+        // is called by the timeout after the extension was disabled, we should just bail out and
+        // clear the loop to avoid a race condition infinitely spamming logs about St.Label not longer being accessible
+        if (Me.state !== extensionUtils.ExtensionState.ENABLED && this._timeout !== null) {
+          this.clearLoop();
+          return;
+        }
         
         this.clearLoop();
-        
+
         const dockerContainers = await Docker.getContainers();       
 
         const dockerCount = dockerContainers.filter((container) => isContainerUp(container)).length;    
