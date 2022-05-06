@@ -24,6 +24,7 @@ function fillPreferencesWindow(window) {
   group.add(row);
 
   const delayInput = new Gtk.SpinButton({
+    valign: Gtk.Align.CENTER,
     climb_rate: 10,
     digits: 0,
     snap_to_ticks: true,
