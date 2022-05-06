@@ -10,6 +10,7 @@ const Docker = Me.imports.src.docker;
 const { DockerSubMenu } = Me.imports.src.dockerSubMenuMenuItem;
 const GObject = imports.gi.GObject;
 const { GLib } = imports.gi;
+const { debounce } = Me.imports.src.utils;
 
 const isContainerUp = (container) => container.status.indexOf("Up") > -1;
 
@@ -22,6 +23,9 @@ var DockerMenu = GObject.registerClass(
       this._refreshCount = this._refreshCount.bind(this);
       this._refreshMenu = this._refreshMenu.bind(this);
       this._feedMenu = this._feedMenu.bind(this);
+      this._updateCountLabel = this._updateCountLabel.bind(this);
+      this._refreshDelayChanged = this._refreshDelayChanged.bind(this);
+      this._debouncedRefreshCount = debounce(this._refreshCount, 500).bind(this);
       this._timeout = null;
 
       this.settings = extensionUtils.getSettings(
@@ -29,6 +33,10 @@ var DockerMenu = GObject.registerClass(
       );
 
       this._refreshDelay = this.settings.get_int('refresh-delay');
+      this.settings.connect(
+        'changed::refresh-delay',
+        this._refreshDelayChanged,
+      );
 
       // Custom Docker icon as menu button
       const hbox = new St.BoxLayout({ style_class: "panel-status-menu-box" });
@@ -60,11 +68,27 @@ var DockerMenu = GObject.registerClass(
       }
     }
 
+    _refreshDelayChanged() {
+      this._refreshDelay = this.settings.get_int('refresh-delay');
+      // Use a debounced function to avoid running the refresh every time the user changes the value
+      this._debouncedRefreshCount();
+    }
+
+    _updateCountLabel(count) {
+      if (this.buttonText.get_text() !== count) {
+        this.buttonText.set_text(count.toString(10));
+      }
+    }
+
     // Refresh  the menu everytime the user opens it
     // It allows to have up-to-date information on docker containers
-    async _refreshMenu() {      
+    async _refreshMenu() {
       if (this.menu.isOpen) {        
         const containers = await Docker.getContainers();
+        this._updateCountLabel(
+          containers.filter(
+            (container) => isContainerUp(container)).length
+          );
         this._feedMenu(containers).catch( (e) => this.menu.addMenuItem(new PopupMenuItem(e.message)));
       }     
     }
@@ -126,18 +150,18 @@ var DockerMenu = GObject.registerClass(
         
         this.clearLoop();
 
-        const dockerCount = await Docker.getContainerCount();  
-        const count = dockerCount.toString(10);
-      
-        if (this.buttonText.get_text() !== count) {
-          this.buttonText.set_text(count);
-        }
+        const dockerCount = await Docker.getContainerCount();        
+        this._updateCountLabel(dockerCount);
         
-        this._timeout = GLib.timeout_add_seconds(
-          GLib.PRIORITY_DEFAULT_IDLE,
-          this._refreshDelay,
-          this._refreshCount
-        );
+        // Allow setting a value of 0 to disable background refresh in the settings
+        if (this._refreshDelay > 0) {
+          this._timeout = GLib.timeout_add_seconds(
+            GLib.PRIORITY_DEFAULT_IDLE,
+            this._refreshDelay,
+            this._refreshCount
+          );
+        }
+          // else log('DockerMenu: refresh disabled');
       } catch (err) {
         logError(err);
         this.clearLoop();

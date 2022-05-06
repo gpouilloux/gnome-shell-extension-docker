@@ -20,7 +20,7 @@ function fillPreferencesWindow(window) {
   page.add(group);
 
   // Create a new preferences row
-  const row = new Adw.ActionRow({ title: 'Container count refresh interval (requires restart)' });
+  const row = new Adw.ActionRow({ title: 'Container count refresh interval. Set to 0 to disable' });
   group.add(row);
 
   const delayInput = new Gtk.SpinButton({
@@ -29,7 +29,7 @@ function fillPreferencesWindow(window) {
     digits: 0,
     snap_to_ticks: true,
     adjustment: new Gtk.Adjustment({
-        lower: 1,
+        lower: 0,
         upper: 3600,
         step_increment: 1,
         page_size: 0,
