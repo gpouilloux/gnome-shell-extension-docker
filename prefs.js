@@ -9,7 +9,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 function init() {
 }
 
-function fillPreferencesWindow(window) {
+function buildPrefsWidget() {
   // Use the same GSettings schema as in `extension.js`
   const settings = ExtensionUtils.getSettings(
       'red.software.systems.easy_docker_containers');
@@ -46,6 +46,5 @@ function fillPreferencesWindow(window) {
   row.add_suffix(delayInput);
   row.activatable_widget = delayInput;
 
-  // Add our page to the window
-  window.add(page);
+  return page;
 }
