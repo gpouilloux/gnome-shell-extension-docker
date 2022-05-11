@@ -21,4 +21,5 @@ function enable() {
 function disable() {
   _indicator.clearLoop();
   _indicator.destroy();
+  _indicator = null;
 }

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. _(The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).)_
 
+## [16] - 2022-0-11
+
+### Fix
+
+- Compatibility issues (Adw) with Gnome 3.x
+- Dangling pointers
+
 ## [15] - 2022-0-11
 
 Add preference UI to setup refresh interval

@@ -25,17 +25,19 @@ var DockerMenu = GObject.registerClass(
       this._feedMenu = this._feedMenu.bind(this);
       this._updateCountLabel = this._updateCountLabel.bind(this);
       this._refreshDelayChanged = this._refreshDelayChanged.bind(this);
-      this._debouncedRefreshCount = debounce(this._refreshCount, 500).bind(this);
+      this._debouncedRefreshCount = debounce(this._refreshCount, 500).bind(
+        this
+      );
       this._timeout = null;
 
       this.settings = extensionUtils.getSettings(
-        'red.software.systems.easy_docker_containers'
+        "red.software.systems.easy_docker_containers"
       );
 
-      this._refreshDelay = this.settings.get_int('refresh-delay');
+      this._refreshDelay = this.settings.get_int("refresh-delay");
       this.settings.connect(
-        'changed::refresh-delay',
-        this._refreshDelayChanged,
+        "changed::refresh-delay",
+        this._refreshDelayChanged
       );
 
       // Custom Docker icon as menu button
@@ -69,7 +71,7 @@ var DockerMenu = GObject.registerClass(
     }
 
     _refreshDelayChanged() {
-      this._refreshDelay = this.settings.get_int('refresh-delay');
+      this._refreshDelay = this.settings.get_int("refresh-delay");
       // Use a debounced function to avoid running the refresh every time the user changes the value
       this._debouncedRefreshCount();
     }
@@ -83,21 +85,20 @@ var DockerMenu = GObject.registerClass(
     // Refresh  the menu everytime the user opens it
     // It allows to have up-to-date information on docker containers
     async _refreshMenu() {
-      if (this.menu.isOpen) {        
+      if (this.menu.isOpen) {
         const containers = await Docker.getContainers();
         this._updateCountLabel(
-          containers.filter(
-            (container) => isContainerUp(container)).length
-          );
-        this._feedMenu(containers).catch( (e) => this.menu.addMenuItem(new PopupMenuItem(e.message)));
-      }     
+          containers.filter((container) => isContainerUp(container)).length
+        );
+        this._feedMenu(containers).catch((e) =>
+          this.menu.addMenuItem(new PopupMenuItem(e.message))
+        );
+      }
     }
 
     _checkServices() {
       if (!Docker.hasPodman && !Docker.hasDocker) {
-        let errMsg = _(
-          "Please install Docker or Podman to use this plugin"
-        );
+        let errMsg = _("Please install Docker or Podman to use this plugin");
         this.menu.addMenuItem(new PopupMenuItem(errMsg));
         throw new Error(errMsg);
       }
@@ -122,37 +123,40 @@ var DockerMenu = GObject.registerClass(
     }
 
     async _check() {
-      return Promise.all(
-        [
-          this._checkServices(),
-          this._checkDockerRunning(),
-          //this._checkUserInDockerGroup()
-        ]
-      );
+      return Promise.all([
+        this._checkServices(),
+        this._checkDockerRunning(),
+        //this._checkUserInDockerGroup()
+      ]);
     }
-    
+
     clearLoop() {
       if (this._timeout) {
         GLib.source_remove(this._timeout);
+        GLib.source_remove(this._debouncedRefreshCount);
+        this._debouncedRefreshCount = null;
         this._timeout = null;
       }
     }
 
     async _refreshCount() {
-      try {       
+      try {
         // If the extension is not enabled but we have already set a timeout, it means this function
         // is called by the timeout after the extension was disabled, we should just bail out and
         // clear the loop to avoid a race condition infinitely spamming logs about St.Label not longer being accessible
-        if (Me.state !== extensionUtils.ExtensionState.ENABLED && this._timeout !== null) {
+        if (
+          Me.state !== extensionUtils.ExtensionState.ENABLED &&
+          this._timeout !== null
+        ) {
           this.clearLoop();
           return;
         }
-        
+
         this.clearLoop();
 
-        const dockerCount = await Docker.getContainerCount();        
+        const dockerCount = await Docker.getContainerCount();
         this._updateCountLabel(dockerCount);
-        
+
         // Allow setting a value of 0 to disable background refresh in the settings
         if (this._refreshDelay > 0) {
           this._timeout = GLib.timeout_add_seconds(
@@ -161,42 +165,43 @@ var DockerMenu = GObject.registerClass(
             this._refreshCount
           );
         }
-          // else log('DockerMenu: refresh disabled');
+        // else log('DockerMenu: refresh disabled');
       } catch (err) {
         logError(err);
         this.clearLoop();
       }
     }
-    
+
     // Append containers to menu
-    async _feedMenu(dockerContainers) {      
-      await this._check();  
+    async _feedMenu(dockerContainers) {
+      await this._check();
       if (
         !this._containers ||
         dockerContainers.length !== this._containers.length ||
-        dockerContainers.some( (currContainer, i) => {
+        dockerContainers.some((currContainer, i) => {
           const container = this._containers[i];
-          
-          return currContainer.project !== container.project ||
-          currContainer.name !== container.name ||
-          isContainerUp(currContainer) !== isContainerUp(container)
+
+          return (
+            currContainer.project !== container.project ||
+            currContainer.name !== container.name ||
+            isContainerUp(currContainer) !== isContainerUp(container)
+          );
         })
-        ) {
-          this.menu.removeAll(); 
-          this._containers = dockerContainers;
-          this._containers.forEach((container) => {
-            const subMenu = new DockerSubMenu(
-              container.project,
-              container.name,
-              container.status
-            );
-            this.menu.addMenuItem(subMenu);
-          });
-          if (!this._containers.length) {
-            this.menu.addMenuItem(new PopupMenuItem("No containers detected"));
-          }  
-      }   
-        
+      ) {
+        this.menu.removeAll();
+        this._containers = dockerContainers;
+        this._containers.forEach((container) => {
+          const subMenu = new DockerSubMenu(
+            container.project,
+            container.name,
+            container.status
+          );
+          this.menu.addMenuItem(subMenu);
+        });
+        if (!this._containers.length) {
+          this.menu.addMenuItem(new PopupMenuItem("No containers detected"));
+        }
+      }
     }
   }
 );
