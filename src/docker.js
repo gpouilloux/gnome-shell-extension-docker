@@ -58,18 +58,12 @@ var isDockerRunning = async () => {
     }
   });
 
-  return Promise.all(images.map(async ({name, status}) => {
-    try {
-      const composePrj = await execCommand(["docker", "inspect", "-f", "{{index .Config.Labels \"com.docker.compose.project\"}}", name]);
-      return {
-        project: composePrj.split('\n')[0].trim(),
-        name,
-        status
-      };
-    } catch (e) {
-      return logError(e);
-    }
-  }));
+  return Promise.all(images.map(({name}) => execCommand(["docker", "inspect", "-f", "{{index .Config.Labels \"com.docker.compose.project\"}}", name])))
+    .then((values) => values.map((commandOutput, i) => ({
+      project: commandOutput.split('\n')[0].trim(),
+        ...images[i]
+    })))
+
 };
 
 /**
@@ -124,7 +118,6 @@ async function execCommand(
   cancellable = null
 ) {
   let execProm = null;
-  const loop = GLib.MainLoop.new(null, false);
   try {
     // There is also a reusable Gio.SubprocessLauncher class available
     let proc = new Gio.Subprocess({
@@ -160,15 +153,12 @@ async function execCommand(
           resolve(stdout);
         } catch (e) {
           reject(e);
-        } finally {
-          loop.quit();
-      }
+        }
       });
     });
   } catch (e) {
     logError(e);
     throw e;
   }
-  loop.run();
   return execProm;
 }
