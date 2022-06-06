@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. _(The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).)_
 
+## [18] - 2022-06-06
+### Fix
+Fixed compatibility issue with gnome 3.x
+
+### Fix
+Remove of Mainloop dependency
+
+
 ## [17] - 2022-05-31
 
 ### Fix

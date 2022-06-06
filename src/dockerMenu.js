@@ -15,8 +15,7 @@ const isContainerUp = (container) => container.status.indexOf("Up") > -1;
 
 // Docker icon as panel menu
 var DockerMenu = GObject.registerClass(
-  class DockerMenu extends panelMenu.Button {
-    _containers = null;
+  class DockerMenu extends panelMenu.Button {    
     _init(menuAlignment, nameText) {
       super._init(menuAlignment, nameText);
       this._refreshCount = this._refreshCount.bind(this);
