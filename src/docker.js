@@ -73,7 +73,7 @@ const getDockerActionCommand = (dockerAction, containerName) => {
         case DockerActions.START:
             return "docker start " + containerName;
         case DockerActions.REMOVE:
-            return "docker rm " + containerName;
+            return "docker rm --force " + containerName;
         case DockerActions.OPEN_SHELL:
             return "docker exec -it " + containerName + " /bin/bash; "
                 + "if [ $? -ne 0 ]; then docker exec -it " + containerName + " /bin/sh; fi;";

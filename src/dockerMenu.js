@@ -28,6 +28,8 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Docker = Me.imports.src.docker;
 const DockerSubMenuMenuItem = Me.imports.src.dockerSubMenuMenuItem;
 const DockerMenuStatusItem = Me.imports.src.dockerMenuStatusItem;
+const DockerMenuStopContainersItem = Me.imports.src.dockerMenuStopContainersItem;
+
 const Utils = Me.imports.src.utils;
 
 // Docker icon on status menu
@@ -62,6 +64,12 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
         if (Docker.isDockerInstalled()) {
             if (Docker.isDockerRunning()) {
                 this._feedMenu();
+
+                // Stop all containers
+                let stopAllContainersItem = new DockerMenuStopContainersItem.DockerMenuStopContainersItem('Stop all containers');
+                this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                this.menu.addMenuItem(stopAllContainersItem);
+
             } else {
                 let errMsg = _("Docker daemon not started");
                 this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
@@ -69,9 +77,9 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
             }
 
             // Add Turn On / Turn Off Switch always
-			let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('Docker status');
-			this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-			this.menu.addMenuItem(statusSwitch);
+            let statusSwitch = new DockerMenuStatusItem.DockerMenuStatusItem('Docker status');
+            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+            this.menu.addMenuItem(statusSwitch);
         } else {
             let errMsg = _("Docker binary not found in PATH ");
             this.menu.addMenuItem(new PopupMenu.PopupMenuItem(errMsg));
@@ -85,6 +93,7 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
         try {
             const containers = Docker.getContainers();
             if (containers.length > 0) {
+                containers.sort(this._compareContainerNames);
                 containers.forEach(container => {
                     const subMenu = new DockerSubMenuMenuItem.DockerSubMenuMenuItem(
                         container.name,
@@ -103,6 +112,18 @@ var DockerMenu = class DockerMenu extends PanelMenu.Button {
             log(errMsg);
             log(err);
         }
+    }
+
+    _compareContainerNames( a, b ) {
+        if ( a.name < b.name ) {
+            return -1;
+        }
+
+        if ( a.name > b.name ) {
+            return 1;
+        }
+
+        return 0;
     }
 };
 
