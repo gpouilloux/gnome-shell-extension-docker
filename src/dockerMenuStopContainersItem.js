@@ -39,7 +39,6 @@ var DockerMenuStopContainersItem = class DockerMenuStopContainersItem extends Po
         try{
             allContainers = Docker.getContainers();
         }catch (err) {
-            allContainers = [];
             log('Error while fetching docker containers')
             return;
         }
