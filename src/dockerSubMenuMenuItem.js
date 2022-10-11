@@ -75,9 +75,12 @@ var DockerSubMenuMenuItem = class DockerSubMenuMenuItem extends PopupMenu.PopupS
             case "paused":
                 this.actor.insert_child_at_index(createIcon('media-playback-pause-symbolic', 'status-paused'), 1);
                 this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.UNPAUSE));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.STOP));
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.REMOVE));
                 break;
             default:
                 this.actor.insert_child_at_index(createIcon('action-unavailable-symbolic', 'status-undefined'), 1);
+                this.menu.addMenuItem(new DockerMenuItem.DockerMenuItem(containerName, DockerActions.REMOVE));
                 break;
         }
     }
